@@ -1,0 +1,7 @@
+Project name: Larmor-Physx
+Released: 14 June 2013
+Author: Pier Paolo Ciarravano
+License:
+This project is released under the Qt Public License (QPL - OSI-Approved Open Source license).
+http://opensource.org/licenses/QPL-1.0
+
