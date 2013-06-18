@@ -1,0 +1,13 @@
+# RIB Scene
+# Author: Pier Paolo Ciarravano
+
+PixelSamples 4 4
+Projection "perspective" "fov" 35
+ShadingInterpolation "smooth"
+Format 1280 720 1
+#ScreenWindow -1.333333 1.333333 -1.000000 1.000000
+Shutter 0 1
+
+Sides 2
+ShadingRate 1
+	

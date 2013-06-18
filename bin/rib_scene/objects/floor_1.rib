@@ -1,0 +1,10 @@
+# Floor Plane
+TransformBegin
+AttributeBegin
+	Attribute "identifier" "name" [ "floor" ] 
+	Scale 100.0 100.0 100.0
+	Surface "paintedplastic"
+	Color 0.6 0.6 0.9
+	Polygon "P" [ 1 0 1   -1 0 1   -1 0 -1   1 0 -1 ] 
+AttributeEnd
+TransformEnd

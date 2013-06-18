@@ -1,0 +1,4 @@
+diff  src/BulletCollision/CMakeLists.txt src/BulletCollision/CMakeLists.txt
+249a250,251
+> TARGET_LINK_LIBRARIES(BulletCollision CGAL boost_thread-mgw45-mt-1_47 boost_serialization-mgw45-mt-1_47 mpfr gmp)
+> 
