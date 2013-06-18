@@ -1,0 +1,5 @@
+
+Surface "paintedplastic" 
+Color 1.0 1.0 1.0
+Attribute "visibility" "transmission" ["opaque"]
+Attribute "visibility" "trace" [1]

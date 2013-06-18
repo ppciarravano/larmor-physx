@@ -1,0 +1,12 @@
+
+LightSource "ambientlight" 1 "intensity" 0.3
+
+Declare "shadows" "string"
+Attribute "light" "shadows" "on"
+		
+LightSource "pointlight" 2 "from" [15 10 15] "float intensity" [250]
+LightSource "pointlight" 3 "from" [-15 10 15] "float intensity" [250]
+LightSource "pointlight" 4 "from" [15 10 -15] "float intensity" [250]
+LightSource "pointlight" 5 "from" [-15 10 -15] "float intensity" [250]
+
+	
