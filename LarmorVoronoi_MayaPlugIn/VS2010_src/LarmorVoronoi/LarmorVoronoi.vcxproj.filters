@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{21c6d5eb-1378-44b5-82bd-be6f4892e63a}</UniqueIdentifier>
+      <Extensions>cpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{79e55b60-8b44-4fe1-9b1a-3e383dfe36f4}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Miscellaneous Files">
+      <UniqueIdentifier>{140f6e15-5ce5-4874-a794-17c57122e7eb}</UniqueIdentifier>
+      <Extensions>txt</Extensions>
+    </Filter>
+    <Filter Include="Source Files\shatter">
+      <UniqueIdentifier>{69153b36-6f71-4ae0-9e84-19b0f4047d6a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt">
+      <Filter>Miscellaneous Files</Filter>
+    </None>
+    <None Include="Options.txt">
+      <Filter>Miscellaneous Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LarmorVoronoiCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\CutterMesher.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\DelaunayVoronoi.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\DisjointMesh.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\MeshCheck.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\MeshMassProperties.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\MeshSimplification.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\RejointMeshes.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\SegmentsArrangement.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\SphereMesher.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\util.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="shatter\VolumeMesh.cpp">
+      <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shatter\Custom.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="shatter\CutterMesher.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="shatter\DelaunayVoronoi.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="shatter\SegmentsArrangement.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="shatter\SphereMesher.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="shatter\util.h">
+      <Filter>Source Files\shatter</Filter>
+    </ClInclude>
+    <ClInclude Include="LarmorVoronoi.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
