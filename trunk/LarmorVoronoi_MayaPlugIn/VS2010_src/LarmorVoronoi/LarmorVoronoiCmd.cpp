@@ -25,12 +25,9 @@ DeclareSimpleCommand( LarmorVoronoi, "Vers.0.1 (02/07/13) - Author: Pier Paolo C
 //
 //	Arguments:
 //		args - the argument list that was passes to the command from MEL
-//
-//	Return Value:
-//		MS::kSuccess - command succeeded
-//		MS::kFailure - command failed (returning this value will cause the 
-//                     MEL script that is being run to terminate unless the
-//                     error is caught using a "catch" statement.
+//      LarmorVoronoi [-np NUM_SHATTER_POINTS] [-d true|false]
+//      NUM_SHATTER_POINTS is the number of the voronoi cells (default 10).
+//      If  -d true  the shatter separates the disjointed surfaces (default false).
 //
 MStatus LarmorVoronoi::doIt( const MArgList& args )
 {
@@ -261,8 +258,6 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 		MGlobal::displayInfo("No Meshes were selected! Nothing to do!");
 	}
 	
-	//test_shatter();
-
 	setResult( "LarmorVoronoi command executed!\n" );
 	
 	return stat;
