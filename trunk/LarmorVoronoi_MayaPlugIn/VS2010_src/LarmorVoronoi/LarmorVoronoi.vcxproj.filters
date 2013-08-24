@@ -16,14 +16,9 @@
     <Filter Include="Source Files\shatter">
       <UniqueIdentifier>{69153b36-6f71-4ae0-9e84-19b0f4047d6a}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt">
-      <Filter>Miscellaneous Files</Filter>
-    </None>
-    <None Include="Options.txt">
-      <Filter>Miscellaneous Files</Filter>
-    </None>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{f33ac00d-531c-43df-ac94-fa91061afbe8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LarmorVoronoiCmd.cpp">
@@ -53,14 +48,14 @@
     <ClCompile Include="shatter\SegmentsArrangement.cpp">
       <Filter>Source Files\shatter</Filter>
     </ClCompile>
-    <ClCompile Include="shatter\SphereMesher.cpp">
-      <Filter>Source Files\shatter</Filter>
-    </ClCompile>
     <ClCompile Include="shatter\util.cpp">
       <Filter>Source Files\shatter</Filter>
     </ClCompile>
     <ClCompile Include="shatter\VolumeMesh.cpp">
       <Filter>Source Files\shatter</Filter>
+    </ClCompile>
+    <ClCompile Include="util\check_version.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,14 +71,14 @@
     <ClInclude Include="shatter\SegmentsArrangement.h">
       <Filter>Source Files\shatter</Filter>
     </ClInclude>
-    <ClInclude Include="shatter\SphereMesher.h">
-      <Filter>Source Files\shatter</Filter>
-    </ClInclude>
     <ClInclude Include="shatter\util.h">
       <Filter>Source Files\shatter</Filter>
     </ClInclude>
     <ClInclude Include="LarmorVoronoi.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\check_version.h">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

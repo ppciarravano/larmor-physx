@@ -1,8 +1,8 @@
 /*
  * Project name: LarmorVoronoi (Larmor-Physx)
  * Mesh Voronoi shatter Maya Plug-in
- * Version 0.1 (for Maya 2012 64 bits)
- * Released: 2 July 2013
+ * Version 0.2 (for Maya 2012) Build 72
+ * Released: 28 July 2013
  * Author: Pier Paolo Ciarravano
  * http://www.larmor.com
  *
@@ -13,6 +13,9 @@
  * In no event will the authors be held liable for any damages arising from the use of this software.
  *
  */
+
+#ifndef LARMORVORONOI_H_
+#define LARMORVORONOI_H_
 
 #include <maya/MSimple.h>
 #include <maya/MFnDependencyNode.h>
@@ -46,6 +49,32 @@
 #include "shatter/util.h"
 #include "shatter/DelaunayVoronoi.h"
 
+#include "util/check_version.h"
+
+//Plugin version
+#define PLUGIN_INFO "Vers.1.0Beta Build 72 (18/08/13) - Author: Pier Paolo Ciarravano www.larmor.com"
+#define PLUGIN_VERSION "1.0Beta-72"
+
+//License and version check
+#define PRODUCT_NAME "LarmorVoronoiMayaPlugin_win2012x64"
+#define PRODUCT_VERSION_BUILD "1.0Beta-72"
+
+typedef std::map<Point, MPoint>   MapPointMPoint;
+typedef std::pair<Point, MPoint>  PairPointMPoint;
+
+class LarmorVoronoi: public MPxCommand
+{
+	public:
+		LarmorVoronoi();
+		virtual	~LarmorVoronoi(); 
+		MStatus doIt( const MArgList& args );
+		static void* creator();
+};
+
+void getPointArrayFromMELvectorArray(MString arrayVectorName, MPointArray &pointsArray);
+
+int buildMeshTrianglesFromSelection(std::list<Triangle> &meshTrianglesToShatter);
+
 void buildVerticesAndConnections(MeshData &meshData, 
 									int &numTriagles, 
 									MPointArray &pieceVertices, 
@@ -53,4 +82,5 @@ void buildVerticesAndConnections(MeshData &meshData,
 									MIntArray &triangleCounts,
 									MIntArray &faceTypes);
 
+#endif /* LARMORVORONOI_H_ */
 

@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2012\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.1\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.1\auxiliary\gmp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2012\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_AFXDLL;_MBCS;NT_PLUGIN;REQUIRE_IOSTREAM;Bits64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeaderOutputFile>Release/LarmorVoronoi.pch</PrecompiledHeaderOutputFile>
@@ -139,8 +139,8 @@
       <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;libCGAL-vc100-mt-4.1.lib;boost_thread-vc100-mt-1_53.lib;boost_serialization-vc100-mt-1_53.lib;boost_chrono-vc100-mt-1_53.lib;libmpfr-4.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2012\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.1\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0\stage\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.1\auxiliary\gmp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;libCGAL-vc100-mt-4.2.lib;boost_thread-vc100-mt-1_53.lib;boost_serialization-vc100-mt-1_53.lib;boost_chrono-vc100-mt-1_53.lib;libmpfr-4.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2012\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0\stage\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>Release\LarmorVoronoi.mll</OutputFile>
       <ImportLibrary>Release/LarmorVoronoi.lib</ImportLibrary>
       <ProgramDatabaseFile>Release/LarmorVoronoi.pdb</ProgramDatabaseFile>
@@ -148,10 +148,6 @@
       <IgnoreSpecificDefaultLibraries>libboost_thread-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_53.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="Options.txt" />
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LarmorVoronoiCmd.cpp" />
     <ClCompile Include="shatter\CutterMesher.cpp" />
@@ -162,9 +158,9 @@
     <ClCompile Include="shatter\MeshSimplification.cpp" />
     <ClCompile Include="shatter\RejointMeshes.cpp" />
     <ClCompile Include="shatter\SegmentsArrangement.cpp" />
-    <ClCompile Include="shatter\SphereMesher.cpp" />
     <ClCompile Include="shatter\util.cpp" />
     <ClCompile Include="shatter\VolumeMesh.cpp" />
+    <ClCompile Include="util\check_version.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LarmorVoronoi.h" />
@@ -172,8 +168,8 @@
     <ClInclude Include="shatter\CutterMesher.h" />
     <ClInclude Include="shatter\DelaunayVoronoi.h" />
     <ClInclude Include="shatter\SegmentsArrangement.h" />
-    <ClInclude Include="shatter\SphereMesher.h" />
     <ClInclude Include="shatter\util.h" />
+    <ClInclude Include="util\check_version.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
