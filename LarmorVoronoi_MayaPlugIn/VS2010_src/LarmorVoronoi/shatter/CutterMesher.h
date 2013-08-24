@@ -23,7 +23,7 @@
 
 //log some messages
 //#define CUTTERMESHER_LOG
-#define CUTTERMESHER_LOG_TIME
+//#define CUTTERMESHER_LOG_TIME
 
 //Esegue TEST E DEBUG
 //#define CUTTERMESHER_TEST_DEBUG
