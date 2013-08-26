@@ -52,7 +52,7 @@
 #include "util/check_version.h"
 
 //Plugin version
-#define PLUGIN_INFO "Vers.1.0Beta Build 72 (18/08/13) - Author: Pier Paolo Ciarravano www.larmor.com"
+#define PLUGIN_INFO "Vers.1.0Beta Build 72 (25/08/13) - Author: Pier Paolo Ciarravano www.larmor.com"
 #define PLUGIN_VERSION "1.0Beta-72"
 
 //License and version check
