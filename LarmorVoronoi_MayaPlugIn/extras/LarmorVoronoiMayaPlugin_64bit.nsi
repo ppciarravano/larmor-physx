@@ -231,9 +231,9 @@ SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${score} "LarmorVoronoi core common DLLs"
-	!insertmacro MUI_DESCRIPTION_TEXT ${s2012} "LarmorVoronoi Plugin for Maya 2012 64bit (stable beta version)"
-	!insertmacro MUI_DESCRIPTION_TEXT ${s2013} "LarmorVoronoi Plugin for Maya 2013 64bit (alfa version)"
-	!insertmacro MUI_DESCRIPTION_TEXT ${s2014} "LarmorVoronoi Plugin for Maya 2014 64bit (alfa version)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${s2012} "LarmorVoronoi Plugin for Maya 2012 64bit (stable Beta version)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${s2013} "LarmorVoronoi Plugin for Maya 2013 64bit (Alfa version)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${s2014} "LarmorVoronoi Plugin for Maya 2014 64bit (Alfa version)"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
