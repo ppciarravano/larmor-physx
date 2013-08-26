@@ -1,0 +1,313 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>LarmorVoronoi Plugin for Maya 2012/2013/2014 - Pier Paolo Ciarravano</title>
+<style type="text/css">
+	<!--
+		body {
+			font-family: 'ArialMT', 'Arial', sans-serif;
+			font-weight: normal;
+			color: #323232;
+			background-attachment: fixed;
+			background-repeat: no-repeat;
+			background-position: 0px 10px;
+			margin-right: 20%;
+			margin-left: 50pt;
+		}
+		p, td, ul, ol, li, #footer {
+			font-family: 'ArialMT', 'Arial', sans-serif;
+			font-size: 14px;
+			color: #463c3c;
+		}
+		td {
+			margin: 0px;
+			padding: 0px;
+			border-collapse: collapse;
+			line-height: 1.40em;
+		}
+		ul {
+			list-style-type: disc;
+			text-align: left;
+			line-height: 1.25em;
+			padding-left: 0;
+			margin-top: 0;
+			margin-left: 15px;
+			margin-bottom: 10px;
+			font-size: 13px;
+		}
+		h1 {
+			font-size: 24px;
+			font-weight: bold;
+			margin-bottom: 10px;
+			margin-top: 0px;
+		}
+		h2 {
+			font-size: 16px;
+			font-weight: bold;
+			margin-bottom: 3px;
+			margin-top: 15px;
+		}
+		li {
+			padding-bottom: 2px;
+			font-size: 13px;
+		}
+		#sublinks {
+			margin-bottom: 20px;
+			font-size: 11px;
+		}
+		h3 {
+			font-size: 14px;
+			font-weight: bold;
+			margin-bottom: 0px;
+			margin-top: 15px;
+			text-transform: capitalize;
+		}
+		h4 {
+			font-size: 12px;
+			font-weight: bold;
+			margin-bottom: 0px;
+			margin-top: 0px;
+		}
+		.toplinks {
+			letter-spacing: 0.5px;
+			word-spacing: 1px;
+			text-align: justify;
+			font-variant: small-caps;
+			width: 840px;
+		}
+		.researchtitle {
+			background-color: b3cbe7;
+		}
+		.authorname {
+			font-size: 14px;
+		}
+	-->
+</style>
+<style type="text/css">
+	<!--
+		body {
+			background-color: #fcf7f1;
+		}
+		a:link {
+			text-decoration: none;
+			color: 5b1e05;
+		}
+		a:visited {
+			text-decoration: none;
+			color: c65634;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+		a:active {
+			text-decoration: none;
+		}
+		.style1 {font-size: 10px}
+	-->
+</style>
+<style type="text/css">
+	<!--
+		article, aside, figure, footer, header, hgroup,	menu, nav, section { display: block; }
+		pre {
+			font-family: "Courier New", Courier, mono;
+			font-size: 14px;
+			font-weight: normal;
+			color: #000000;
+			float: left;
+			margin: 0;
+		}
+		div.CodeBox {
+			border: solid 1px black;
+			padding: 10px;
+			background-color: #ece7e1;
+		}
+		#codediv:after { content: " "; display: block; clear: both;}
+		
+		
+		.math table{ margin: auto; }
+		table.matrix{ margin: auto; } /* allows table to be centered */
+		.matrix td{
+			text-align: center;
+			line-height: 1.2em;
+			padding: 0 1ex 0ex 1ex;
+		}
+		table.matrixbrak { margin: auto; }
+		table.hybridmatrixbrak { 
+			margin: auto;
+			border-left: solid thin black;
+			border-right: solid thin black;
+		}
+		td.lbrak {
+			width: 0.8ex;
+			font-size: 50%;
+			border: solid thin black;
+			border-right: none;
+		}
+		td.rbrak { 
+			width: 0.8ex; font-size: 50%;
+			border: solid thin black;
+			border-left: none;
+		}
+		.matrixbrak td { line-height: 1.6; }
+		.norm {
+			width: 0.3ex;
+			border-left: thin black solid;
+			border-right: thin black solid;
+		}
+		.matrixbracket { 
+			border-left: thin black solid;
+			border-right: thin black solid;
+		}
+		.matrixbracket .nibs { 
+			width: 0.3ex;
+			border-top: thin black solid;
+			border-bottom: thin black solid;
+		}
+	-->
+</style>
+</head>
+<body>
+<br>
+<table border="0" align="left" cellpadding="0" cellspacing="0">
+<tbody><tr><td class="toplinks"><h1>LarmorVoronoi Plugin for Maya 2012/2013/2014</h1>
+<span class="authorname"><i>Author: Pier Paolo Ciarravano - <a href="http://www.larmor.com">www.larmor.com</a></i></span><br></td></tr>
+<tr><td><hr></td></tr>
+</tbody></table><br><br><br>
+<!-- fcf7f1  and f9f0e4 -->
+
+<table><tbody>
+
+<!-- Project description -->
+<tr><td bgcolor="fcf7f1" align="left" valign="top">
+  <b>Project description</b><br>
+  <br>
+LarmorVoronoi is a Voronoi Shatter Plug-in in C++ for Maya 2012/2013/2014 that uses the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
+The <a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">project</a> is Free Software released under the <a href="http://www.gnu.org/licenses/gpl.html">GNU/GPL License</a> and it is part of the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
+<ul>
+	<li>The Plugin implements a Voronoi shatter of non-convex closed triangles meshes (Maya polygon surfaces) using C++ and <a href="http://www.cgal.org/">CGAL</a></li>
+	<li>The shatter uses the Voronoi brute force algorithm implemented in multithreading</li>
+	<li>The cut faces are rebuilt using the Constrained Delaunay triangulation</li>
+	<li>The triangles mesh can contain multiple holes and cavities with nested objects</li>
+	<li>The algorithm can separate the disjointed surfaces</li>
+	<li>The Plugin can calculate the mesh's volume and the inertia tensor using the volume 3D Triangulation</li>
+</ul>
+<a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">Google code source repository for Visual Studio 2010 project</a><br>
+<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/LarmorVoronoiMayaPlugin-1.0Beta-Build72.exe">Plug-in Binary version 1.0Beta-Build72 for Maya 2012/2013/2014 64 bit Windows.</a><br>
+For last news, documentation updates and video tutorial visit the <a href="http://code.google.com/p/larmor-physx/">project page</a>.<br>
+</td></tr>
+<tr><td align="cenger" valign="center"><br><hr><br></td></tr>
+
+<!-- Project description -->
+<tr><td bgcolor="fcf7f1" align="left" valign="top">
+  <b>Documentation</b><br>
+  <br>
+
+To shatter one or more polygonal meshes the plugin works using the command <i>LarmorVoronoi</i> with this syntax:<br><br>
+<div id="codediv" class="CodeBox"><pre>
+LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode]
+</pre></div><br>
+<i>int_num_pieces</i> is the number of the voronoi cells (default 10).<br>
+If <i>-d true</i> the shatter separates the disjointed surfaces (default false).<br>
+<i>string_vector_array_name</i> is the global array vector name from MEL that contains the voronoi cell 3d points.<br><br>
+
+The command works on the Maya selected polygonal meshes. These can be also one inside the others doing holes and cavities with nested objects.<br>
+Using the parameter <i>-np</i> the voronoi points are random generated and uniformly distributed in the minimum bounding box that contains the selected meshes.<br>
+Using the parameter <i>-p</i> the user can specify the voronoi points for the decomposition, e.g.:<br><br>
+<div id="codediv" class="CodeBox"><pre>
+//Generate the points vector
+global vector $vpoints[];
+$vpoints = {};
+int $i = 0;
+for ($x = 5; $x <= 5; $x++) { 
+	for ($y = -5; $y <= 5; $y++) { 
+		for ($z = -5; $z <= 5; $z++) {
+			//Build the point
+			$vpoints[$i] = <<$x, $y, $z>>; 
+			//print($vpoints[$i]);
+			$i++;
+		}
+	}
+} 
+
+//Run the shatter using the points vector
+LarmorVoronoi -p vpoints;
+</pre></div><br>
+
+Using the parameter <i>-d true</i> the shatter separates the disjointed surfaces in the case more closed surfaces are in the same voronoi cell; it should be used when the voronoi cells are big and the mesh surface is non-convex. E.g.:<br><br>
+<div id="codediv" class="CodeBox"><pre>
+polyCube -ch on -o on -w 10 -h 10 -d 10 -cuv 4 ;
+polyCube -ch on -o on -w 9 -h 9 -d 9 -cuv 4 ;
+polyCube -ch on -o on -w 6 -h 6 -d 6 -cuv 4 ;
+polyCube -ch on -o on -w 5 -h 5 -d 5 -cuv 4 ;
+select -all;
+LarmorVoronoi -np 10 -ex 0.5 -d 1;
+</pre></div><br>
+Using the parameter <i>-ex float_explode</i> the voronoi pieces will be exploded from the mesh barycenter with the distance <i>float_explode</i>.<br><br>
+The generated meshes use the face colors to identify the cut surface: use Maya Mesh Component Display panel and check Display colors to see the mesh colors.<br><br><br> 
+
+To calculate the mesh volume and the inertia tensor use the command with this syntax:<br><br>
+<div id="codediv" class="CodeBox"><pre>
+LarmorVoronoi -vi float_facet_distance_multiple
+</pre></div><br>
+<i>float_facet_distance_multiple</i> is the multiple for the precision of volume and inertia calculation (e.g. 10, 100, 1000). These value improve the number of the tetrahedrons of the volume 3D triangulation used to calculate the volume and the inertia tensor.<br>
+The command returns in a float vector the mesh volume and the inertia tensor, to read this vector from MEL use this syntax: e.g.<br><br>
+<div id="codediv" class="CodeBox"><pre>
+float $vals[];
+$vals = `LarmorVoronoi -vi 100`;
+print($vals);
+</pre></div><br>
+in <i>$vals</i> will be returned the follow values:<br><br>
+<div id="codediv" class="CodeBox"><pre>
+[volume, inertia_a, inertia_bb, inertia_cc, inertia_bb, inertia_b, inertia_aa, inertia_cc, inertia_aa, inertia_c]
+</pre></div><br>
+where the inertia tensor is:<br>
+<div class="math">
+	<table cellpadding="0" cellspacing="0" class="matrixbrak">
+	<tr><td class="lbrak">&nbsp;</td>
+	    <td> <table cellpadding="0" cellspacing="0" class="matrix">
+		<tr><td><i>inertia_a</i></td> <td><i>-inertia_bb</i></td> <td><i>-inertia_cc</i></td></tr>
+		<tr><td><i>-inertia_bb</i></td> <td><i>inertia_b</i></td> <td><i>-inertia_aa</i></td></tr>
+		<tr><td><i>-inertia_cc</i></td> <td><i>-inertia_aa</i></td> <td><i>inertia_c</i></td></tr>
+		</table> </td>
+	    <td class="rbrak">&nbsp;</td>
+	</tr>
+	</table>
+</div>
+<br><br>
+
+Use the Maya standard output window to see the plugin output.<br><br>
+When the plugin is initialised it checks online if there is any plugin updates and returns the message on the output window.<br><br>
+Please comment and report issues on the <a href="http://code.google.com/p/larmor-physx/">project page</a>.<br>
+ 
+</td></tr>
+<tr><td align="cenger" valign="center"><br><hr><br></td></tr>
+
+<!-- Project description -->
+<tr><td bgcolor="fcf7f1" align="left" valign="top">
+  <b>Release Notes</b><br>
+  <br>
+<b>Version: 1.0Beta-Build72 (Released 25/08/2013)</b><br>
+Stable Beta release for Maya 2012 64 bits with version check, complete commands and installer.<br>
+The Plugin for Maya 2013 and 2014 is in Alfa version.<br>
+The multithreading is not active in this version.<br><br>
+
+<b>Version: 0.1  (Released 03/07/2013)</b><br>
+First release<br>
+</td></tr>
+<tr><td align="cenger" valign="center"><br><hr><br></td></tr>
+
+<!-- License -->
+<tr><td bgcolor="fcf7f1" align="left" valign="top">
+  <b>License</b><br>
+  <br>
+The <a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">project</a> is Free Software released under the <a href="http://www.gnu.org/licenses/gpl.html">GNU/GPL License</a> and it is part of the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
+This software is provided 'as-is', without any express or implied warranty.<br>
+In no event will the authors be held liable for any damages arising from the use of this software.<br><br>
+Contact the author Pier Paolo Ciarravano (<a href="http://www.larmor.com">www.larmor.com</a>) if you are interested in any commercial use of the source code of the plugin or  the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.
+</td></tr>
+<tr><td align="cenger" valign="center"><br><hr><br></td></tr>
+
+</tbody></table>
+
+<span class="authorname">Page last updated: Aug 25 2013</span>
+<br><br>
+
+</body></html>
