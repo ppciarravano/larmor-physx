@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Larmor-Physx Version 1.0 2013
+; Larmor-Physx Version 1.0.1 2013
 ; Copyright (c) 2013 Pier Paolo Ciarravano - http://www.larmor.com
 ; All rights reserved.
 ;
@@ -14,14 +14,14 @@
 ; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ; GNU General Public License for more details.
-;
+; 
 ; You should have received a copy of the GNU General Public License
 ; along with LarmorVoronoi Maya Plugin. If not, see <http://www.gnu.org/licenses/>.
-;
+; 
 ; Licensees holding a valid commercial license may use this file in
 ; accordance with the commercial license agreement provided with the
 ; software.
-;
+; 
 ; Author: Pier Paolo Ciarravano
 ; $Id$
 ;
@@ -35,11 +35,11 @@
 ;http://nsis.sourceforge.net/Environmental_Variables:_append,_prepend,_and_remove_entries
 !include "EnvVarUpdate.nsh" 
 
-!define VERSION "1.0Beta-Build72"
+!define VERSION "1.0.1Beta-Build73"
 !define SHORT_NAME "LarmorVoronoi Plugin for Maya"
 !define MED_NAME "LarmorVoronoiMayaPlugin"
 !define FULL_NAME "LarmorVoronoi Plugin for Maya 2012/2013/2014 64bit"
-!define RELEASE_DATE "25/08/2013"
+!define RELEASE_DATE "02/10/13"
 
 Name "${SHORT_NAME}"
 
@@ -135,12 +135,31 @@ Function installModule
 
 		FileOpen $0 "$MODULE_FILE_LOCATION\LarmorVoronoi_MayaPlugin.txt" a
 		FileSeek $0 0 END
-		FileWrite $0 " $INSTDIR$\n"
+		FileWrite $0 " $INSTDIR\$MAYA_VERSION_NAME$\n"
 		FileClose $0
 
 		SetShellVarContext all
 		;SetRegView 64
 		WriteRegStr HKLM "SOFTWARE\Larmor.com\${MED_NAME}" "$MAYA_VERSION_NAME" "$MODULE_FILE_LOCATION\LarmorVoronoi_MayaPlugin.txt"
+		
+		; copy plug-in files
+		CreateDirectory "$INSTDIR\$MAYA_VERSION_NAME"
+		CreateDirectory "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
+		SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
+		
+		${Switch} "$MAYA_VERSION_NAME"
+			${Case} "2012-x64"
+				File "2012-x64\plug-ins\*.*"
+			${Break}
+			${Case} "2013-x64"
+				File "2013-x64\plug-ins\*.*"
+			${Break}
+			${Case} "2014-x64"
+				File "2014-x64\plug-ins\*.*"
+			${Break}
+			${Default}
+			${Break}
+		${EndSwitch}
  
 FunctionEnd
 
@@ -155,6 +174,12 @@ Function un.removeModule
 	ModuleFound:
 		; remove the module
 		Delete "$MODULE_FILE_LOCATION"
+		
+		; remove files
+		Delete "$INSTDIR\$MAYA_VERSION_NAME\plug-ins\*.*"
+		Delete "$INSTDIR\$MAYA_VERSION_NAME\*.*"
+		RMDir "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
+		RMDir "$INSTDIR\$MAYA_VERSION_NAME"
 	 
 FunctionEnd
 
@@ -167,7 +192,7 @@ InstType "Maya 2012 64bit"
 InstType "Maya 2013 64bit"
 InstType "Maya 2014 64bit"
 
-Section "!LarmorVoronoi libs" score
+Section "!Common libs" score
 	SectionIn RO
 	AddSize 1
 	SectionIn 1 2 3
@@ -175,12 +200,12 @@ Section "!LarmorVoronoi libs" score
 	SetShellVarContext all
 
 	CreateDirectory "$INSTDIR\doc"
-	CreateDirectory "$INSTDIR\plug-ins"
+	CreateDirectory "$INSTDIR\shared"
 
 	SetOutPath "$INSTDIR\doc"
 	File "doc\*.*"
 
-	SetOutPath "$INSTDIR\plug-ins"
+	SetOutPath "$INSTDIR\shared"
 	File "dll\*.*"
 
 	SetOutPath "$INSTDIR"
@@ -192,7 +217,7 @@ Section "!LarmorVoronoi libs" score
 	WriteRegStr HKLM "SOFTWARE\Larmor.com\${MED_NAME}" "VERSION" "${VERSION}"
 
 	; add plugin dlls path to env variable
-	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\plug-ins"  
+	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\shared"  
 
 	; install shortcuts
 	CreateDirectory "$SMPROGRAMS\${SHORT_NAME}\"
@@ -213,8 +238,8 @@ Section "!LarmorVoronoi libs" score
 SectionEnd
 
 
-Section "Maya 2012 64bit" s2012
-	AddSize 1 
+Section /o "Maya 2012 64bit" s2012
+	AddSize 3200
 	SectionIn 1
 
 	StrCpy $MAYA_VERSION_NAME "2012-x64"
@@ -223,7 +248,7 @@ SectionEnd
 
 
 Section /o "Maya 2013 64bit" s2013
-	AddSize 1
+	AddSize 3200
 	SectionIn 2
 
 	StrCpy $MAYA_VERSION_NAME "2013-x64"
@@ -231,8 +256,8 @@ Section /o "Maya 2013 64bit" s2013
 SectionEnd
 
 
-Section /o "Maya 2014 64bit" s2014
-	AddSize 1
+Section "Maya 2014 64bit" s2014
+	AddSize 3200
 	SectionIn 3
 
 	StrCpy $MAYA_VERSION_NAME "2014-x64"
@@ -243,8 +268,8 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${score} "LarmorVoronoi core common DLLs"
 	!insertmacro MUI_DESCRIPTION_TEXT ${s2012} "LarmorVoronoi Plugin for Maya 2012 64bit (stable Beta version)"
-	!insertmacro MUI_DESCRIPTION_TEXT ${s2013} "LarmorVoronoi Plugin for Maya 2013 64bit (Alfa version)"
-	!insertmacro MUI_DESCRIPTION_TEXT ${s2014} "LarmorVoronoi Plugin for Maya 2014 64bit (Alfa version)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${s2013} "LarmorVoronoi Plugin for Maya 2013 64bit (stable Beta version)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${s2014} "LarmorVoronoi Plugin for Maya 2014 64bit (stable Beta version)"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
@@ -257,19 +282,16 @@ Section "Uninstall"
 	ReadRegStr $INSTDIR HKLM "SOFTWARE\Larmor.com\${MED_NAME}" "INSTALLDIR"
 	;MessageBox MB_OK "INSTDIR: $INSTDIR" 
 
-
-
 	; remove plugin dlls path to env variable
-	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\plug-ins"  
+	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\shared"  
 
 	; remove install directory
 	Delete "$INSTDIR\doc\*.*"
-	Delete "$INSTDIR\plug-ins\*.*"
+	Delete "$INSTDIR\shared\*.*"
 	Delete "$INSTDIR\*.*"
 	RMDir "$INSTDIR\doc"
-	RMDir "$INSTDIR\plug-ins"
-	RMDir "$INSTDIR"
-
+	RMDir "$INSTDIR\shared"
+	
 	; remove links in start menu
 	Delete "$SMPROGRAMS\${SHORT_NAME}\*.*"
 	RMDir "$SMPROGRAMS\${SHORT_NAME}"
@@ -286,4 +308,6 @@ Section "Uninstall"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MED_NAME}"
 	DeleteRegKey HKLM "SOFTWARE\Larmor.com\${MED_NAME}"
   
+	RMDir "$INSTDIR"
+	
 SectionEnd
