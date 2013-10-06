@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2012\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2014\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\include;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_AFXDLL;_MBCS;NT_PLUGIN;REQUIRE_IOSTREAM;Bits64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeaderOutputFile>Release/LarmorVoronoi.pch</PrecompiledHeaderOutputFile>
@@ -140,7 +140,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Foundation.lib;OpenMaya.lib;libCGAL-vc100-mt-4.2.lib;boost_thread-vc100-mt-1_53.lib;boost_serialization-vc100-mt-1_53.lib;boost_chrono-vc100-mt-1_53.lib;libmpfr-4.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2012\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0\stage\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2014\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\boost_1_53_0\boost_1_53_0\stage\lib;C:\LARMOR\DEVELOP\CGAL_WINDOWS\CGAL-4.2\auxiliary\gmp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>Release\LarmorVoronoi.mll</OutputFile>
       <ImportLibrary>Release/LarmorVoronoi.lib</ImportLibrary>
       <ProgramDatabaseFile>Release/LarmorVoronoi.pdb</ProgramDatabaseFile>

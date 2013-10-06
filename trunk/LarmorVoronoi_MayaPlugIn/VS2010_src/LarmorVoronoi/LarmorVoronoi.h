@@ -65,12 +65,12 @@
 #include "util/check_version.h"
 
 //Plugin version
-#define PLUGIN_INFO "Vers.1.0Beta Build 72 (25/08/13) - Author: Pier Paolo Ciarravano www.larmor.com"
-#define PLUGIN_VERSION "1.0Beta-72"
+#define PLUGIN_INFO "Vers.1.0.1Beta Build 73 (02/10/13) - Author: Pier Paolo Ciarravano www.larmor.com"
+#define PLUGIN_VERSION "1.0.1Beta-73"
 
 //License and version check
-#define PRODUCT_NAME "LarmorVoronoiMayaPlugin_win2012x64"
-#define PRODUCT_VERSION_BUILD "1.0Beta-72"
+#define PRODUCT_NAME "LarmorVoronoiMayaPlugin_win2014x64"
+#define PRODUCT_VERSION_BUILD "1.0.1Beta-73"
 
 typedef std::map<Point, MPoint>   MapPointMPoint;
 typedef std::pair<Point, MPoint>  PairPointMPoint;
