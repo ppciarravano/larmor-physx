@@ -77,7 +77,7 @@ typedef std::pair<MeshData,Point> TranslatedMeshData;
 //typedef std::list<TranslatedMeshData> TranslatedMeshDataList;
 
 //Main voronoiShatter Function
-std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points);
+std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points, bool useDelaunay = true, double bCriteria = 0.125, double sCriteria = 0.0);
 
 //Util Functions
 std::list<KDPoint> randomPointsInSphere(int numPoints, double radius);
@@ -97,8 +97,8 @@ std::list<TranslatedMeshData> centerMeshesInBarycenter(std::list<MeshData> &list
 std::list<KDPoint> translatePoints(std::list<KDPoint> &listPoints, KDPoint vectorPoint);
 
 //Complete Voronoi Shatter distribution functions
-std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData, int numPoints, bool doDisjointMesh);
-std::list<MeshData> voronoiShatter_uniformDistributionPoints(TrianglesList &meshTriangles, int numPoints, bool doDisjointMesh);
+std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData, int numPoints, bool doDisjointMesh, bool useDelaunay = true, double bCriteria = 0.125, double sCriteria = 0.0);
+std::list<MeshData> voronoiShatter_uniformDistributionPoints(TrianglesList &meshTriangles, int numPoints, bool doDisjointMesh, bool useDelaunay = true, double bCriteria = 0.125, double sCriteria = 0.0);
 std::list<MeshData> voronoiShatter_sphereDistributionOnPoint(MeshData &meshData, int numPoints, KDPoint targetPoint, double radius, bool doDisjointMesh);
 std::list<MeshData> voronoiShatter_sphereDistributionOnPoint(TrianglesList &meshTriangles, int numPoints, KDPoint targetPoint, double radius, bool doDisjointMesh);
 

@@ -333,9 +333,13 @@ class TBBVoronoiCell {
 	//tbb::concurrent_vector<MeshData> *concurrentResultMeshdata;
 	std::list<MeshData> *const resultMeshdata;
 
+	bool useDelaunay;
+	double bCriteria;
+	double sCriteria;
+
 	public:
 		//TBBVoronoiCell(MeshData &md, Delaunay &dT, tbb::concurrent_vector<MeshData> &crm)
-		TBBVoronoiCell(MeshData &md, Delaunay &dT, std::list<MeshData> &rm) : meshData(&md), T(&dT), resultMeshdata(&rm) { }
+		TBBVoronoiCell(MeshData &md, Delaunay &dT, std::list<MeshData> &rm, bool useDelaunay_param, double bCriteria_param, double sCriteria_param) : meshData(&md), T(&dT), resultMeshdata(&rm), useDelaunay(useDelaunay_param), bCriteria(bCriteria_param), sCriteria(sCriteria_param) { }
 
 		//~TBBVoronoiCell() {
 		//	std::cout << "  Call of ~TBBVoronoiCell" << std::endl;
@@ -387,7 +391,7 @@ class TBBVoronoiCell {
 				Point mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
 				Plane planeCutter_voronoi(mp, Vector(-vect.x(), -vect.y(), -vect.z()));
 
-				MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo);
+				MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo, useDelaunay, bCriteria, sCriteria);
 				cutMeshTriangles = cutData.first;
 				cutInfo = cutData.second;
 
@@ -411,7 +415,7 @@ class TBBVoronoiCell {
 };
 
 //TODO: still sometimes is crashing: test on linux and using a different compiler or TBB libs
-std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points)
+std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points, bool useDelaunay, double bCriteria, double sCriteria)
 {
 	CGAL::Timer timer;
 	timer.start();
@@ -432,7 +436,7 @@ std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points
 
 	//Run multiple Thread using TBB
 	//TBBVoronoiCell tbbVC(meshData, T, concurrentResultMeshdata);
-	TBBVoronoiCell tbbVC(meshData, T, resultMeshdata);
+	TBBVoronoiCell tbbVC(meshData, T, resultMeshdata, useDelaunay, bCriteria, sCriteria);
 	int numberThreads = tbb::task_scheduler_init::default_num_threads();
 	std::cout << "numberThreads: " << numberThreads << std::endl;
 	tbb::task_scheduler_init init(numberThreads);
@@ -456,7 +460,7 @@ std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points
 	return resultMeshdata;
 }
 #else
-std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points)
+std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points, bool useDelaunay, double bCriteria, double sCriteria)
 {
 	CGAL::Timer timer;
 	timer.start();
@@ -496,7 +500,7 @@ std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points
 			Point mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
 			Plane planeCutter_voronoi(mp, Vector(-vect.x(), -vect.y(), -vect.z()));
 
-			MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo);
+			MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo, useDelaunay, bCriteria, sCriteria);
 			cutMeshTriangles = cutData.first;
 			cutInfo = cutData.second;
 
@@ -528,16 +532,16 @@ std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points
 }
 #endif
 
-std::list<MeshData> voronoiShatter_uniformDistributionPoints(TrianglesList &meshTriangles, int numPoints, bool doDisjointMesh)
+std::list<MeshData> voronoiShatter_uniformDistributionPoints(TrianglesList &meshTriangles, int numPoints, bool doDisjointMesh, bool useDelaunay, double bCriteria, double sCriteria)
 {
 	//Build MeshData
 	TrianglesInfoList cutInfo = createNewTriangleInfoList(meshTriangles);
 	MeshData meshData(meshTriangles, cutInfo);
-	return voronoiShatter_uniformDistributionPoints(meshData, numPoints, doDisjointMesh);
+	return voronoiShatter_uniformDistributionPoints(meshData, numPoints, doDisjointMesh, useDelaunay, bCriteria, sCriteria);
 }
 
 //Completed Voronoi Shatter distribution function: uniformDistributionPoints
-std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData, int numPoints, bool doDisjointMesh)
+std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData, int numPoints, bool doDisjointMesh, bool useDelaunay, double bCriteria, double sCriteria)
 {
 	//Get Bounding Box
 	std::pair<Point,Point> boundingBox = getMeshBoundingBox(meshData);
@@ -578,7 +582,7 @@ std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData,
 
 
 	//Compute Voronoi Shatter
-	std::list<MeshData> shatteredMeshes = voronoiShatter(meshData, randomPoints);
+	std::list<MeshData> shatteredMeshes = voronoiShatter(meshData, randomPoints, useDelaunay, bCriteria, sCriteria);
 
 	if (doDisjointMesh)
 	{
