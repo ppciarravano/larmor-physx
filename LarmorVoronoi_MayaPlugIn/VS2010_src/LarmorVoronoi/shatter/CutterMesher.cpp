@@ -112,7 +112,7 @@ std::list<TriangleInfo> createNewTriangleInfoList(std::list<Triangle> &meshInput
 	return trianglesInfo;
 }
 
-MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<TriangleInfo> &trianglesInfoInput) {
+MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<TriangleInfo> &trianglesInfoInput, bool useDelaunay, double bCriteria, double sCriteria) {
 
 	CGAL::Timer timer;
 	timer.start();
@@ -426,10 +426,10 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 
 	if (allFacesHoles.size() > 0)
 	{
-		#ifdef CUTTERMESHER_USE_DELAUNAY
-
+		if (useDelaunay)
+		{
 			//try {
-				bool validDelaunay = faceBuilder_Delaunay(segmentsArrangment, meshOutput, trianglesInfoOutput, plane, mapIdTriangleInfo);
+				bool validDelaunay = faceBuilder_Delaunay(segmentsArrangment, meshOutput, trianglesInfoOutput, plane, mapIdTriangleInfo, bCriteria, sCriteria);
 				if (!validDelaunay)
 				{
 					std::cout << "   faceBuilder_Delaunay is not valid: using faceBuilder_exact..." << std::endl;
@@ -439,8 +439,9 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 			//catch (CGAL::Assertion_exception e) {
 			//	std::cout << "\n\nERROR ON faceBuilder_Delaunay: " << e.message() << std::endl;
 			//}
-
-		#else
+		}
+		else
+		{
 
 			#ifdef CUTTERMESHER_USE_ONLY_EXACT_FACE_BUILDER
 				faceBuilder_exact(segmentsArrangment, meshOutput, trianglesInfoOutput, plane, mapIdTriangleInfo);
@@ -450,8 +451,7 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 					faceBuilder_exact(segmentsArrangment, meshOutput, trianglesInfoOutput, plane, mapIdTriangleInfo);
 				}
 			#endif
-
-		#endif
+		}
 	}
 	else
 	{
@@ -883,7 +883,7 @@ bool faceBuilder_exact(SegmentsArrangement &segmentsArrangment, TrianglesList &m
 }
 
 
-bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo)
+bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo, double bCriteria, double sCriteria)
 {
 	//Recupero allFacesHolesVector dal SegmentsArrangement
 	std::vector<FaceHoleInfo> allFacesHoles = segmentsArrangment.getAllFacesHolesVectorInObject();
@@ -939,7 +939,7 @@ bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList
 			Segment_2 seg = *faceSegsIter;
 			if (seg.start() != seg.end())
 			{
-
+				
 				#ifdef CUTTERMESHER_TEST_DEBUG
 				std::cout << "[" <<seg.start().x() << ", " << seg.start().y() << " ; ";
 				std::cout << seg.end().x() << ", " << seg.end().y() << "] " << std::endl;
@@ -1072,7 +1072,12 @@ bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList
 	if (isValidCDT)
 	{
 		//Genero la Delaunay mesh
-		CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
+		//For the Criteria parameters see the page:
+		// http://doc.cgal.org/latest/Mesh_2/classCGAL_1_1Delaunay__mesh__size__criteria__2.html
+		// the parameter default values are bCriteria = 0.125 and sCriteria = 0.0
+		//std::cout << "bCriteria: " << bCriteria << ", sCriteria: " << sCriteria << std::endl;
+		CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(bCriteria, sCriteria));
+		//CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
 		//CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(0.1, 0.3));
 		//CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(2, 2));
 

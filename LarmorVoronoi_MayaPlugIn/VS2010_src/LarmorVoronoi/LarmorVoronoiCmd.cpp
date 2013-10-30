@@ -63,7 +63,7 @@ MStatus initializePlugin( MObject obj )
 	//std::cout << "send version check" << std::endl;
 	LarmorCheckProductVersion(PRODUCT_NAME, PRODUCT_VERSION_BUILD, productInfo);
 	
-	// init plugin
+	//init plugin
 	MStatus   status;
 	MFnPlugin plugin( obj, PLUGIN_INFO, PLUGIN_VERSION, "Any");
 	status = plugin.registerCommand( "LarmorVoronoi", LarmorVoronoi::creator );
@@ -72,12 +72,25 @@ MStatus initializePlugin( MObject obj )
 		return status;
 	}
 
+	//Initialize GUI
+	MGlobal::executeCommand( "source LarmorVoronoiUI.mel" );
+	MString melInitCmd( "larmorVoronoiUI_initialize(\"" );
+	melInitCmd += PLUGIN_INFO;
+	melInitCmd += "\", \"";
+	melInitCmd += PLUGIN_VERSION;
+	melInitCmd += "\");";
+	MGlobal::executeCommand( melInitCmd );
+
 	return status;
 }
 
 MStatus uninitializePlugin( MObject obj)
 {
 	//std::cout << "uninitializePlugin LarmorVoronoi" << std::endl;
+
+	//Uninitialize GUI
+	MGlobal::executeCommand( "source LarmorVoronoiUI.mel" );
+	MGlobal::executeCommand( "larmorVoronoiUI_uninitialize();" );
 
 	MStatus   status;
 	MFnPlugin plugin( obj );
@@ -97,13 +110,17 @@ MStatus uninitializePlugin( MObject obj)
 //
 //	Arguments:
 //		args - the argument list that was passes to the command from MEL
-//      LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode]
+//      LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode] [-dy bool_use_delaunay [-dyb delaunay_b_criteria] [-dys delaunay_s_criteria] ]
 //      or LarmorVoronoi -vi float_facet_distance_multiple
 //      int_num_pieces is the number of the voronoi cells (default 10).
 //      If  -d true  the shatter separates the disjointed surfaces (default false).
 //		string_vector_array_name is the global array vector nome from MEL
 //      float_explode is the pieces distance if -ex is used
 //      float_facet_distance_multiple is the multiple for the precision of volume and inertia calculation (e.g. 10, 100, 1000)
+//		If  -dy true  the shatter uses the Delaunay 2D triangulation to build the cutted faces, otherwise (default) is used the simple triangulation 
+//		The Delaunay 2D triangulation uses the CGAL::Delaunay_mesh_size_criteria_2 http://doc.cgal.org/latest/Mesh_2/classCGAL_1_1Delaunay__mesh__size__criteria__2.html
+//		delaunay_b_criteria is the b criteria value of CGAL::Delaunay_mesh_size_criteria_2
+//		delaunay_s_criteria is the S criteria value of CGAL::Delaunay_mesh_size_criteria_2
 //
 MStatus LarmorVoronoi::doIt( const MArgList& args )
 {
@@ -112,7 +129,7 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 	{
 		MGlobal::displayInfo(LarmorCheckProductVersion_getMessage().c_str());
 	}
-	MGlobal::displayInfo("Use: LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode]");
+	MGlobal::displayInfo("Use: LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode] [-dy bool_use_delaunay [-dyb delaunay_b_criteria] [-dys delaunay_s_criteria] ]");
 	MGlobal::displayInfo(" or: LarmorVoronoi -vi float_facet_distance_multiple");
 
 	//MStatus stat = MS::kSuccess;
@@ -126,6 +143,9 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 	double explodeDistance = 1.0;
 	bool doVolumeInertia = false;
 	double facetDistanceMultiple = 0.0;
+	bool useDelaunay = false;
+	double bCriteria = 0.125;
+	double sCriteria = 0.0;
 	//parameter for number of pieces
 	index = args.flagIndex( "np", "npieces" );
 	if( index != MArgList::kInvalidArgIndex )
@@ -195,6 +215,36 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 		MString argsVolumeMessage("Calculate Volume and Inertia with facet distance multiple: ");
 		argsVolumeMessage += (double)facetDistanceMultiple;
 		MGlobal::displayInfo(argsVolumeMessage);
+	}
+	//parameter for use Delaunay 2D triangulation
+	index = args.flagIndex( "dy", "delaunay" );
+	if( index != MArgList::kInvalidArgIndex )
+	{
+		args.get( index+1, useDelaunay );
+		MGlobal::displayInfo("Using Delaunay 2D triangulation");
+	}
+	if (useDelaunay)
+	{
+		//parameter for Delaunay bCriteria
+		index = args.flagIndex( "dyb", "dybcriteria" );
+		if( index != MArgList::kInvalidArgIndex )
+		{
+			args.get( index+1, bCriteria );
+
+			MString argsBCriteriaMessage(" with bCriteria: ");
+			argsBCriteriaMessage += (double)bCriteria;
+			MGlobal::displayInfo(argsBCriteriaMessage);
+		}
+		//parameter for Delaunay sCriteria
+		index = args.flagIndex( "dys", "dyscriteria" );
+		if( index != MArgList::kInvalidArgIndex )
+		{
+			args.get( index+1, sCriteria );
+
+			MString argsSCriteriaMessage(" with sCriteria: ");
+			argsSCriteriaMessage += (double)sCriteria;
+			MGlobal::displayInfo(argsSCriteriaMessage);
+		}
 	}
 	// end read the command arguments and initialize
 
@@ -312,7 +362,7 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 				MGlobal::displayInfo("Running Voronoi shatter using custom points ...");
 				TrianglesInfoList cutInfo = createNewTriangleInfoList(meshTrianglesToShatter);
 				MeshData meshData(meshTrianglesToShatter, cutInfo);
-				shatterMeshesNoCentered = voronoiShatter(meshData, customPoints);
+				shatterMeshesNoCentered = voronoiShatter(meshData, customPoints, useDelaunay, bCriteria, sCriteria);
 				if (disjointMeshes)
 				{
 					//Disjoint meshes
@@ -323,7 +373,7 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 			{
 				//Use uniformDistributionPoints in bounding box
 				MGlobal::displayInfo("Running Voronoi shatter using uniform distribution points on bounding box ...");
-				shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(meshTrianglesToShatter, numberPieces, disjointMeshes);
+				shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(meshTrianglesToShatter, numberPieces, disjointMeshes, useDelaunay, bCriteria, sCriteria);
 			}			
 			
 			//Center meshes in their barycenters
@@ -392,21 +442,40 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 					continue;
 				}
 				
+
+				//std::cout << "Created Maya mesh, assigning colors..." << std::endl;
 				//Set Face colors
-				//TODO: use setColors and assignColors: it should be fast
 				MColor red(1.0f, 0.0f, 0.0f);
 				MColor blue(0.0f, 0.0f, 1.0f);
+				
+				MColorArray colorsForFaces;
+				colorsForFaces.clear();
+				colorsForFaces.setLength( numTriangles );
+
+				MIntArray faceIndexesList;
+				faceIndexesList.clear();
+				faceIndexesList.setLength( numTriangles );
+					
 				for (int j = 0; j < numTriangles; j++)
 				{
 					if (faceTypes[j] == 0)
 					{
-						newMeshFn.setFaceColor(blue, j);
+						colorsForFaces[j] = blue;
 					}
 					else
 					{
-						newMeshFn.setFaceColor(red, j);
+						colorsForFaces[j] = red;
 					}
+					faceIndexesList[j] = j;
 				}
+				
+				//Set mesh faces colors 
+				MStatus colorStatus = newMeshFn.setFaceColors(colorsForFaces, faceIndexesList);
+				if ( colorStatus == MS::kFailure )
+				{
+					std::cout << "setFaceColors error: " << colorStatus.errorString() << std::endl;
+				}
+				
 
 				//TODO: set mesh normals
 				// using MFnMesh::setVertexNormals and MFnMesh::setFaceVertexNormals
@@ -549,46 +618,50 @@ int buildMeshTrianglesFromSelection(std::list<Triangle> &meshTrianglesToShatter)
 		for (; !itPolygon.isDone(); itPolygon.next() )
 		{
 			// Get object-relative indices for the vertices in this face.
-			MIntArray polygonVertices;
-			itPolygon.getVertices( polygonVertices );
+			//MIntArray polygonVertices;
+			//itPolygon.getVertices( polygonVertices );
 
 			// Get triangulation of this poly.
-			int numTriangles = itPolygon.count();
-			while ( numTriangles-- )
+			int numTriangles = 0;
+			MStatus statNumTriangles = itPolygon.numTriangles( numTriangles );
+			if ( statNumTriangles == MS::kSuccess )
 			{
-				MPointArray nonTweaked;
-				// object-relative vertex indices for each triangle
-				MIntArray tv;
-				// face-relative vertex indices for each triangle
-				MIntArray localIndex;
-
-				MStatus stat = itPolygon.getTriangle( numTriangles,
-												nonTweaked,
-												tv,
-												MSpace::kObject );
-
-				if ( stat == MS::kSuccess )
+				while ( numTriangles-- )
 				{
-					/*
-					std::cout << "Triangle: " << std::endl;
-					std::cout << "X0:" << meshPoints[tv[0]].x << std::endl;
-					std::cout << "Y0:" << meshPoints[tv[0]].y << std::endl;
-					std::cout << "Z0:" << meshPoints[tv[0]].z << std::endl;
-					std::cout << "X1:" << meshPoints[tv[1]].x << std::endl;
-					std::cout << "Y1:" << meshPoints[tv[1]].y << std::endl;
-					std::cout << "Z1:" << meshPoints[tv[1]].z << std::endl;
-					std::cout << "X2:" << meshPoints[tv[2]].x << std::endl;
-					std::cout << "Y2:" << meshPoints[tv[2]].y << std::endl;
-					std::cout << "Z2:" << meshPoints[tv[2]].z << std::endl;
-					*/
+					MPointArray nonTweaked;
+					// object-relative vertex indices for each triangle
+					MIntArray tv;
+					// face-relative vertex indices for each triangle
+					//MIntArray localIndex;
 
-					//Create the CGAL Points
-					Point p1(meshPoints[tv[0]].x, meshPoints[tv[0]].y, meshPoints[tv[0]].z);
-					Point p2(meshPoints[tv[1]].x, meshPoints[tv[1]].y, meshPoints[tv[1]].z);
-					Point p3(meshPoints[tv[2]].x, meshPoints[tv[2]].y, meshPoints[tv[2]].z);
+					MStatus stat = itPolygon.getTriangle( numTriangles,
+													nonTweaked,
+													tv,
+													MSpace::kObject );
 
-					//Add the triagle in meshTrianglesToShatter
-					meshTrianglesToShatter.push_back(Triangle(p1,p2,p3));
+					if ( stat == MS::kSuccess )
+					{
+						/*
+						std::cout << "Triangle: " << std::endl;
+						std::cout << "X0:" << meshPoints[tv[0]].x << std::endl;
+						std::cout << "Y0:" << meshPoints[tv[0]].y << std::endl;
+						std::cout << "Z0:" << meshPoints[tv[0]].z << std::endl;
+						std::cout << "X1:" << meshPoints[tv[1]].x << std::endl;
+						std::cout << "Y1:" << meshPoints[tv[1]].y << std::endl;
+						std::cout << "Z1:" << meshPoints[tv[1]].z << std::endl;
+						std::cout << "X2:" << meshPoints[tv[2]].x << std::endl;
+						std::cout << "Y2:" << meshPoints[tv[2]].y << std::endl;
+						std::cout << "Z2:" << meshPoints[tv[2]].z << std::endl;
+						*/
+
+						//Create the CGAL Points
+						Point p1(meshPoints[tv[0]].x, meshPoints[tv[0]].y, meshPoints[tv[0]].z);
+						Point p2(meshPoints[tv[1]].x, meshPoints[tv[1]].y, meshPoints[tv[1]].z);
+						Point p3(meshPoints[tv[2]].x, meshPoints[tv[2]].y, meshPoints[tv[2]].z);
+
+						//Add the triagle in meshTrianglesToShatter
+						meshTrianglesToShatter.push_back(Triangle(p1,p2,p3));
+					}
 				}
 			}
 		}
@@ -597,23 +670,25 @@ int buildMeshTrianglesFromSelection(std::list<Triangle> &meshTrianglesToShatter)
 }
 
 void buildVerticesAndConnections(MeshData &meshData, 
-	int &numTriagles, 
+	int &numTriangles, 
 	MPointArray &pieceVertices, 
 	MIntArray &pieceConnections,
 	MIntArray &trianglePolyCounts,
 	MIntArray &faceTypes)
 {
-	numTriagles = meshData.first.size();
-	int numVertices = numTriagles * 3;
+	numTriangles = meshData.first.size();
+	int numVertices = numTriangles * 3;
+
+	std::cout << "New mesh - num triangles: " << numTriangles << std::endl;
 
 	pieceVertices.clear();
 	pieceVertices.setLength( numVertices );
 	pieceConnections.clear();
 	pieceConnections.setLength( numVertices );
 	trianglePolyCounts.clear();
-	trianglePolyCounts.setLength( numTriagles );
+	trianglePolyCounts.setLength( numTriangles );
 	faceTypes.clear();
-	faceTypes.setLength( numTriagles );
+	faceTypes.setLength( numTriangles );
 
 	MapPointMPoint mapPointMPoint;
 

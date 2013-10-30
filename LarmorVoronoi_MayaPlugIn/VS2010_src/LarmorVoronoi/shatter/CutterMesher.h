@@ -30,8 +30,8 @@
 #ifndef CUTTERMESHER_H_
 #define CUTTERMESHER_H_
 
-//Use Delaunay mesh triangulation for cutted faces: it require more cpu time but it give better results
-#define CUTTERMESHER_USE_DELAUNAY
+//Use Delaunay mesh triangulation for cutted faces as default: it require more cpu time but it give better results
+#define CUTTERMESHER_DEFAULT_USE_DELAUNAY true
 
 //Use only exact precision for face building
 //#define CUTTERMESHER_USE_ONLY_EXACT_FACE_BUILDER
@@ -237,11 +237,11 @@ inline bool isSignedDistancePositive(Plane &plane, Point point);
 
 std::list<TriangleInfo> createNewTriangleInfoList(std::list<Triangle> &meshInput);
 
-MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<TriangleInfo> &trianglesInfoInput);
+MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<TriangleInfo> &trianglesInfoInput, bool useDelaunay = CUTTERMESHER_DEFAULT_USE_DELAUNAY, double bCriteria = 0.125, double sCriteria = 0.0);
 
 bool faceBuilder_inexact(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo);
 bool faceBuilder_exact(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo);
-bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo);
+bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList &meshOutput, TrianglesInfoList &trianglesInfoOutput, Plane &plane, MapIdTriangleInfo &mapIdTriangleInfo, double bCriteria = 0.125, double sCriteria = 0.0);
 
 //Deprecated: it doesn't work
 std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Plane plane);

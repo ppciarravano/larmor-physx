@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Larmor-Physx Version 1.0.1 2013
+; Larmor-Physx Version 1.1.0 2013
 ; Copyright (c) 2013 Pier Paolo Ciarravano - http://www.larmor.com
 ; All rights reserved.
 ;
@@ -35,11 +35,11 @@
 ;http://nsis.sourceforge.net/Environmental_Variables:_append,_prepend,_and_remove_entries
 !include "EnvVarUpdate.nsh" 
 
-!define VERSION "1.0.1Beta-Build73"
+!define VERSION "1.1.0Beta-Build77"
 !define SHORT_NAME "LarmorVoronoi Plugin for Maya"
 !define MED_NAME "LarmorVoronoiMayaPlugin"
 !define FULL_NAME "LarmorVoronoi Plugin for Maya 2012/2013/2014 64bit"
-!define RELEASE_DATE "02/10/13"
+!define RELEASE_DATE "26/10/13"
 
 Name "${SHORT_NAME}"
 
@@ -145,17 +145,26 @@ Function installModule
 		; copy plug-in files
 		CreateDirectory "$INSTDIR\$MAYA_VERSION_NAME"
 		CreateDirectory "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
-		SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
+		CreateDirectory "$INSTDIR\$MAYA_VERSION_NAME\scripts"
 		
 		${Switch} "$MAYA_VERSION_NAME"
 			${Case} "2012-x64"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
 				File "2012-x64\plug-ins\*.*"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\scripts"
+				File "2012-x64\scripts\*.*"
 			${Break}
 			${Case} "2013-x64"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
 				File "2013-x64\plug-ins\*.*"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\scripts"
+				File "2013-x64\scripts\*.*"
 			${Break}
 			${Case} "2014-x64"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
 				File "2014-x64\plug-ins\*.*"
+				SetOutPath "$INSTDIR\$MAYA_VERSION_NAME\scripts"
+				File "2014-x64\scripts\*.*"
 			${Break}
 			${Default}
 			${Break}
@@ -177,8 +186,10 @@ Function un.removeModule
 		
 		; remove files
 		Delete "$INSTDIR\$MAYA_VERSION_NAME\plug-ins\*.*"
+		Delete "$INSTDIR\$MAYA_VERSION_NAME\scripts\*.*"
 		Delete "$INSTDIR\$MAYA_VERSION_NAME\*.*"
 		RMDir "$INSTDIR\$MAYA_VERSION_NAME\plug-ins"
+		RMDir "$INSTDIR\$MAYA_VERSION_NAME\scripts"
 		RMDir "$INSTDIR\$MAYA_VERSION_NAME"
 	 
 FunctionEnd
@@ -222,7 +233,8 @@ Section "!Common libs" score
 	; install shortcuts
 	CreateDirectory "$SMPROGRAMS\${SHORT_NAME}\"
 	CreateShortCut "$SMPROGRAMS\${SHORT_NAME}\Documentation.lnk" "$INSTDIR\doc\LarmorVoronoiMayaPlugin.html"
-	CreateShortCut "$SMPROGRAMS\${SHORT_NAME}\Online project page.lnk" "http://code.google.com/p/larmor-physx/"
+	CreateShortCut "$SMPROGRAMS\${SHORT_NAME}\Online project documentation.lnk" "http://www.larmor.com/LarmorVoronoiMayaPlugin/"
+	CreateShortCut "$SMPROGRAMS\${SHORT_NAME}\Open Larmor-Physx project page.lnk" "http://code.google.com/p/larmor-physx/"
 	CreateShortCut "$SMPROGRAMS\${SHORT_NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
 	; write the uninstall keys & uninstaller for Windows

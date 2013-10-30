@@ -182,15 +182,15 @@
 LarmorVoronoi is a Voronoi Shatter Plug-in in C++ for Maya 2012/2013/2014 that uses the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
 The <a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">project</a> is Free Software released under the <a href="http://www.gnu.org/licenses/gpl.html">GNU/GPL License</a> and it is part of the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
 <ul>
-	<li>The Plugin implements a Voronoi shatter of non-convex closed triangles meshes (Maya polygon surfaces) using C++ and <a href="http://www.cgal.org/">CGAL</a></li>
+	<li>The Plugin implements a Voronoi shatter of non-convex closed triangle meshes (Maya polygon surfaces) using C++ and <a href="http://www.cgal.org/">CGAL</a></li>
 	<li>The shatter uses the Voronoi brute force algorithm implemented in multithreading</li>
 	<li>The cut faces are rebuilt using the Constrained Delaunay triangulation</li>
-	<li>The triangles mesh can contain multiple holes and cavities with nested objects</li>
+	<li>The triangle meshes can contain multiple holes and cavities with nested objects</li>
 	<li>The algorithm can separate the disjointed surfaces</li>
 	<li>The Plugin can calculate the mesh's volume and the inertia tensor using the volume 3D Triangulation</li>
 </ul>
 <a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">Google code source repository for Visual Studio 2010 project</a><br>
-<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/LarmorVoronoiMayaPlugin-1.0.1Beta-Build73.exe">Plug-in Binary version 1.0.1Beta-Build73 for Maya 2012/2013/2014 64 bit Windows.</a><br>
+<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/LarmorVoronoiMayaPlugin-1.1.0Beta-Build77.exe">Plug-in Binary version 1.1.0Beta-Build77 for Maya 2012/2013/2014 64 bit Windows.</a><br>
 For last news, documentation updates and video tutorial visit the <a href="http://code.google.com/p/larmor-physx/">project page</a>.<br>
 </td></tr>
 <tr><td align="cenger" valign="center"><br><hr><br></td></tr>
@@ -199,10 +199,17 @@ For last news, documentation updates and video tutorial visit the <a href="http:
 <tr><td bgcolor="fcf7f1" align="left" valign="top">
   <b>Documentation</b><br>
   <br>
+Is possible use the MEL GUI window accessible from the new Maya menu <i>"LarmorVoronoi"</i> in order to use the plug-in easily. Using the GUI is possible have access to all the functionalities below described.<br><br>
+
+<img src="screenshot_1.jpg" alt="Mesh shatter window" width="452" height="353"><br>
+<h4>The new Maya menu "LarmorVoronoi" and the Mesh shatter window</h4><br><br>
+<img src="screenshot_2.jpg" alt="Mesh Volume and Inertia tensor window" width="447" height="301"><br>
+<h4>The Mesh Volume and Inertia tensor window</h4><br><br>
 
 To shatter one or more polygonal meshes the plugin works using the command <i>LarmorVoronoi</i> with this syntax:<br><br>
 <div id="codediv" class="CodeBox"><pre>
 LarmorVoronoi [-np int_num_pieces | -p string_vector_array_name] [-d bool_disjoint] [-ex float_explode]
+     [-dy bool_use_delaunay [-dyb delaunay_b_criteria] [-dys delaunay_s_criteria] ]
 </pre></div><br>
 <i>int_num_pieces</i> is the number of the voronoi cells (default 10).<br>
 If <i>-d true</i> the shatter separates the disjointed surfaces (default false).<br>
@@ -241,6 +248,8 @@ select -all;
 LarmorVoronoi -np 10 -ex 0.5 -d 1;
 </pre></div><br>
 Using the parameter <i>-ex float_explode</i> the voronoi pieces will be exploded from the mesh barycenter with the distance <i>float_explode</i>.<br><br>
+By default the Plug-in uses a simple 2D triangulation for the cutted faces; using the parameter <i>-dy true</i> will be used a Delaunay 2D triangulation for the cutted faces. Using the parameters <i>-dyb delaunay_b_criteria</i> and <i>-dys delaunay_s_criteria</i> is possibile specify the <i>CGAL::Delaunay_mesh_size_criteria_2</i> values for the <i>CGAL::refine_Delaunay_mesh_2</i> algorithm where <i>delaunay_b_criteria</i> is the <i>b</i> criteria value and <i>delaunay_b_criteria</i> is the <i>S</i> criteria value in <a href="http://doc.cgal.org/latest/Mesh_2/classCGAL_1_1Delaunay__mesh__size__criteria__2.html" target="_blank"><i>CGAL::Delaunay_mesh_size_criteria_2</i></a>. Using Delaunay 2D triangulation, the refinement algorithm may not terminate.<br><br>
+
 The generated meshes use the face colors to identify the cut surface: use Maya Mesh Component Display panel and check Display colors to see the mesh colors.<br><br><br> 
 
 To calculate the mesh volume and the inertia tensor use the command with this syntax:<br><br>
@@ -256,7 +265,7 @@ print($vals);
 </pre></div><br>
 in <i>$vals</i> will be returned the follow values:<br><br>
 <div id="codediv" class="CodeBox"><pre>
-[volume, inertia_a, inertia_bb, inertia_cc, inertia_bb, inertia_b, inertia_aa, inertia_cc, inertia_aa, inertia_c]
+[volume, inertia_a, inertia_b, inertia_c, inertia_aa, inertia_bb, inertia_cc]
 </pre></div><br>
 where the inertia tensor is:<br>
 <div class="math">
@@ -275,6 +284,9 @@ where the inertia tensor is:<br>
 
 Use the Maya standard output window to see the plugin output.<br><br>
 When the plugin is initialised it checks online if there is any plugin updates and returns the message on the output window.<br><br>
+
+<a href="http://www.youtube.com/watch?v=WF31Q60SKTU" target="_blank">The YouTube video tutorial is available at this link</a>. New video tutorials will be available from the <a href="http://www.larmor.com/LarmorVoronoiMayaPlugin/" target="_blank">project online documentation</a>.<br><br>
+
 Please comment and report issues on the <a href="http://code.google.com/p/larmor-physx/">project page</a>.<br>
  
 </td></tr>
@@ -284,6 +296,16 @@ Please comment and report issues on the <a href="http://code.google.com/p/larmor
 <tr><td bgcolor="fcf7f1" align="left" valign="top">
   <b>Release Notes</b><br>
   <br>
+<b>Version: 1.1.0Beta-Build77 (Released 26/10/2013)</b><br>
+Stable Beta release for Maya 2012/2013/2014 64 bits (Windows) with version check, complete commands, MEL GUI and installer.<br>
+Added a MEL GUI window accessible from a new Maya menu in order to use the plug-in easily.<br>
+Added simple 2D triangolation for the cutted faces.<br>
+Added a parameter to switch on the Delaunay 2D triangulation for the cutted faces.<br>
+Added parameters to specify the Delaunay 2D triangulation criteria for the cutted faces.<br>
+Performance improvements creating big triangle meshes using setFaceColors method of MFnMesh.<br>
+Performance improvements importing mesh: bug fix for import of triangles using numTriangles method of MItMeshPolygon.<br>
+The multithreading is not active in this version.<br><br>
+
 <b>Version: 1.0.1Beta-Build73 (Released 02/10/2013)</b><br>
 Stable Beta release for Maya 2012/2013/2014 64 bits (Windows) with version check, complete commands and installer.<br>
 The multithreading is not active in this version.<br><br>
@@ -293,7 +315,7 @@ Stable Beta release for Maya 2012 64 bits (Windows) with version check, complete
 The Plugin for Maya 2013 and 2014 is in Alfa version.<br>
 The multithreading is not active in this version.<br><br>
 
-<b>Version: 0.1  (Released 03/07/2013)</b><br>
+<b>Version: 0.1 (Released 03/07/2013)</b><br>
 First release<br>
 </td></tr>
 <tr><td align="cenger" valign="center"><br><hr><br></td></tr>
@@ -311,7 +333,7 @@ Contact the author Pier Paolo Ciarravano (<a href="http://www.larmor.com">www.la
 
 </tbody></table>
 
-<span class="authorname">Page last updated: Oct. 2nd 2013</span>
+<span class="authorname">Page last updated: Oct. 26th 2013</span>
 <br><br>
 
 </body></html>
