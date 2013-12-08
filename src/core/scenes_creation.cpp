@@ -29,8 +29,235 @@
 
 #include "scenes_creation.h"
 
+#define CONV_PI  3.14159265358979323846f
+
 namespace LarmorPhysx
 {
+
+	void generateRotatingExplodingScene()
+	{
+		//Load initial Frame
+		Frame stepFrame = LarmorPhysx::loadFrame(0);
+		unsigned int frameCounter = 0;
+
+		//Step 0: pause
+		const unsigned int fs0 = 2; //2 seconds
+		for (unsigned int step = 0;	step < (fs0 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+		//Step 1: rotation not exploded
+		const unsigned int fs1 = 5; //5 seconds
+		for (unsigned int step = 0;	step < (fs1 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			float timeRad = 360 * (step / (fs1 * 300.0)) * CONV_PI / 180.0;
+			float rotationRad = (-cos(timeRad/2.0)+1)/2.0*CONV_PI*2.0;
+			//std::cout << "rotationRad: " << rotationRad << std::endl;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+
+				double posZ = dobj.position.z * cos(rotationRad) - dobj.position.x * sin(rotationRad);
+				double posX = dobj.position.z * sin(rotationRad) + dobj.position.x * cos(rotationRad);
+				double posY = dobj.position.y;
+				dobj.position.x = posX;
+				dobj.position.y = posY;
+				dobj.position.z = posZ;
+				dobj.rotationAngle = rotationRad;
+				dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+		//Step 2: exploding
+		Frame stepFrameExploded;
+		const unsigned int fs2 = 5; //5 seconds
+		for (unsigned int step = 0;	step < (fs2 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			float timeRad = 360 * (step / (fs2 * 300.0)) * CONV_PI / 180.0;
+			float dist = (-cos(timeRad/2.0)+1)/4.0;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+
+				dobj.position.x = dobj.position.x * dist + dobj.position.x;
+				dobj.position.y = dobj.position.y * dist + dobj.position.y;
+				dobj.position.z = dobj.position.z * dist + dobj.position.z;
+
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+			stepFrameExploded = frame;
+		}
+
+		//Step 3: rotation exploded
+		const unsigned int fs3 = 10; //5 seconds
+		for (unsigned int step = 0;	step < (fs3 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			float timeRad = 360 * (step / (fs3 * 300.0)) * CONV_PI / 180.0;
+			float rotationRad = (-cos(timeRad/2.0)+1)/2.0*CONV_PI*2.0;
+			//std::cout << "rotationRad: " << rotationRad << std::endl;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrameExploded.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrameExploded.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+
+				double posZ = dobj.position.z * cos(rotationRad) - dobj.position.x * sin(rotationRad);
+				double posX = dobj.position.z * sin(rotationRad) + dobj.position.x * cos(rotationRad);
+				double posY = dobj.position.y;
+				dobj.position.x = posX;
+				dobj.position.y = posY;
+				dobj.position.z = posZ;
+				dobj.rotationAngle = rotationRad;
+				dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+		//Step 4: imploding
+		const unsigned int fs4 = 3; //3 seconds
+		for (unsigned int step = 0;	step < (fs4 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			float timeRad = 360 * (step / (fs4 * 300.0)) * CONV_PI / 180.0;
+			float dist = (cos(timeRad/2.0)+1)/4.0;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+
+				dobj.position.x = dobj.position.x * dist + dobj.position.x;
+				dobj.position.y = dobj.position.y * dist + dobj.position.y;
+				dobj.position.z = dobj.position.z * dist + dobj.position.z;
+
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+		//Step 5: pause
+		const unsigned int fs5 = 2; //2 seconds
+		for (unsigned int step = 0;	step < (fs5 * 300);	step++)
+		{
+			frameCounter++;
+			Frame frame;
+			frame.idFrame = frameCounter;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+				frame.dynamicObjects.push_back(dobj);
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+	}
+
+	void generateRotatingScene()
+	{
+		//Load initial Frame
+		Frame stepFrame = LarmorPhysx::loadFrame(0);
+
+		for (unsigned int frameCounter = 1;
+			frameCounter <= LarmorPhysx::ConfigManager::total_anim_steps;
+			++frameCounter)
+		{
+			Frame frame;
+			frame.idFrame = frameCounter;
+			float rot = frameCounter;
+
+			DynamicObjectVector::iterator dynamicObjectVectorIter;
+			for(dynamicObjectVectorIter = stepFrame.dynamicObjects.begin();
+					dynamicObjectVectorIter != stepFrame.dynamicObjects.end();
+					++dynamicObjectVectorIter)
+			{
+				DynamicObject dobj = *dynamicObjectVectorIter;
+				//StaticObject sobj = LarmorPhysx::loadStaticObject( dobj.idObj );
+
+				float rotationRad = rot * CONV_PI / 180.0;
+
+				double posZ = dobj.position.z * cos(rotationRad) - dobj.position.x * sin(rotationRad);
+				double posX = dobj.position.z * sin(rotationRad) + dobj.position.x * cos(rotationRad);
+				double posY = dobj.position.y;
+
+				dobj.position.x = posX;
+				dobj.position.y = posY;
+				dobj.position.z = posZ;
+
+				dobj.rotationAngle = rotationRad;
+				dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+
+				frame.dynamicObjects.push_back(dobj);
+
+			}
+
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+		}
+
+	}
+
 
 	//Generate exploding scene for demo
 	// Explode all scene object from world origin (0,0,0)
@@ -1314,11 +1541,11 @@ namespace LarmorPhysx
 		//Create innested Cubes
 		std::list<Triangle> readedTriangles;
 		//Use r for a empty box
-		for (int r = 0; r < 1; ++r)
+		for (int r = 0; r < 2; ++r)
 		{
-			float a = 6.0 - r*0.2;
-			float b = 6.0 - r*0.2;
-			float c = 6.0 - r*0.2;
+			float a = 1.5 - r*0.1;
+			float b = 0.3 - r*0.07;
+			float c = 0.3 - r*0.07;
 			Point a1(-a, b, c);
 			Point b1(-a, -b, c);
 			Point c1(a, -b, c);
@@ -1347,24 +1574,29 @@ namespace LarmorPhysx
 		readedTriangles.clear();
 
 
-		/*
+
 		//Empty sphere
-		std::list<Triangle> readedTriangles = readOffMeshToTriangles("mesh_sphere_05.off");
+		readedTriangles = readOffMeshToTriangles("mesh_sphere_05.off");
 		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
-		std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 2.0);
+		std::list<Triangle> outTriangles2 = scaleAndCenterMesh(readedTriangles, 2.0);
 		//std::list<Triangle> outTriangles = readedTriangles;
 		//Add empty sphere
 		// Total volume: (4/3 * pi * (2)^3  - 4/3 * pi * (1.8)^3)  = 9.0812
-		std::list<Triangle> outTrianglesInner = scaleAndCenterMesh(readedTriangles, 1.9);
+		std::list<Triangle> outTrianglesInner = scaleAndCenterMesh(readedTriangles, 1.0);
 		std::list<Triangle>::iterator triangleIter;
 		for(triangleIter = outTrianglesInner.begin(); triangleIter != outTrianglesInner.end(); ++triangleIter)
 		{
 			Triangle t = *triangleIter;
 			outTriangles.push_back(t);
 		}
+		for(triangleIter = outTriangles2.begin(); triangleIter != outTriangles2.end(); ++triangleIter)
+		{
+			Triangle t = *triangleIter;
+			outTriangles.push_back(t);
+		}
 		std::cout << "Readed Mesh" << std::endl;
 		readedTriangles.clear();
- 	 	*/
+
 
 		/*
 		//Lattice mesh
@@ -1386,7 +1618,15 @@ namespace LarmorPhysx
 		*/
 
 		//Build Complete shattered pieces of mesh
-		std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(outTriangles, ConfigManager::break_pieces_test, false);
+		//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(outTriangles, ConfigManager::break_pieces_test, false);
+
+		std::list<KDPoint> translatedPoints;
+		translatedPoints.push_back(KDPoint(-2, 0, 0));
+		translatedPoints.push_back(KDPoint(2, 0, 0));
+
+		TrianglesInfoList cutInfot = createNewTriangleInfoList(outTriangles);
+		MeshData meshDatas(outTriangles, cutInfot);
+		std::list<MeshData> shatterMeshesNoCentered = voronoiShatter(meshDatas, translatedPoints);
 		std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
 
 		//Create Frame
@@ -1438,5 +1678,160 @@ namespace LarmorPhysx
 		LarmorPhysx::saveFrame(frame);
 
 	}
+
+
+	//Scene to call with generateExplodingScene for demo exploding
+	void createFirstFrame_Scene12()
+	{
+		std::cout << "createFirstFrame_Scene12 Starting..." << std::endl;
+
+		/*
+		//Create box
+		std::list<Triangle> readedTriangles;
+		float a = 10.2285;
+		float b = 7.2188;
+		float c = 4.57401;
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+		 */
+
+		/*
+		//Empty sphere
+		std::list<Triangle> outTriangles;
+		std::list<Triangle> readedTriangles = readOffMeshToTriangles("mesh_sphere_05.off");
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+		std::list<Triangle> outTriangles2 = scaleAndCenterMesh(readedTriangles, 2.0);
+		//std::list<Triangle> outTriangles = readedTriangles;
+		//Add empty sphere
+		// Total volume: (4/3 * pi * (2)^3  - 4/3 * pi * (1.8)^3)  = 9.0812
+		//std::list<Triangle> outTrianglesInner = scaleAndCenterMesh(readedTriangles, 1.8);
+		std::list<Triangle>::iterator triangleIter;
+		//for(triangleIter = outTrianglesInner.begin(); triangleIter != outTrianglesInner.end(); ++triangleIter)
+		//{
+		//	Triangle t = *triangleIter;
+		//	outTriangles.push_back(t);
+		//}
+		for(triangleIter = outTriangles2.begin(); triangleIter != outTriangles2.end(); ++triangleIter)
+		{
+			Triangle t = *triangleIter;
+			outTriangles.push_back(t);
+		}
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+		*/
+
+		/*
+		//Lattice mesh
+		std::list<Triangle> readedTriangles = readObjMeshToTriangles("lattice.obj");
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+		std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 0.03);
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+		*/
+
+
+		//Stanford Dragon mesh
+		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_recon\\dragon_vrip.ply"); //dragon_vrip_res2.ply
+		//std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+		//std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 50);
+		////std::list<Triangle> outTriangles = readedTriangles;
+		//std::cout << "Readed Mesh" << std::endl;
+		//readedTriangles.clear();
+
+		/*
+		// dump bounding box
+		TrianglesInfoList cutInfot = createNewTriangleInfoList(readedTriangles);
+		MeshData meshDatas(readedTriangles, cutInfot);
+		std::pair<Point,Point> boundingBox = getMeshBoundingBox(meshDatas);
+		KDPoint bboxMin = converPointExactToInexact(boundingBox.first);
+		KDPoint bboxMax = converPointExactToInexact(boundingBox.second);
+		std::cout << "bboxMin: " << bboxMin.x() << ", " << bboxMin.y() << ", " << bboxMin.z() << std::endl;
+		std::cout << "bboxMax: " << bboxMax.x() << ", " << bboxMax.y() << ", " << bboxMax.z() << std::endl;
+		 */
+
+		//Build Complete shattered pieces of mesh
+		std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(readedTriangles, ConfigManager::break_pieces_test, true);
+
+		/*
+		std::list<KDPoint> translatedPoints;
+		translatedPoints.push_back(KDPoint(-2, 0, 0));
+		translatedPoints.push_back(KDPoint(2, 0, 0));
+
+		TrianglesInfoList cutInfot = createNewTriangleInfoList(outTriangles);
+		MeshData meshDatas(outTriangles, cutInfot);
+		std::list<MeshData> shatterMeshesNoCentered = voronoiShatter(meshDatas, translatedPoints);
+		*/
+
+		std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		std::list<TranslatedMeshData>::iterator meshDataInter;
+		for(meshDataInter = shatterMeshes.begin(); meshDataInter != shatterMeshes.end(); ++meshDataInter)
+		{
+			TranslatedMeshData meshDataPartTranslated = *meshDataInter;
+			frame.lastCreatedIdObj++;
+
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = 0;
+			so.meshData = meshDataPartTranslated;
+			so.simplifyMesh = TrianglesList();
+
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = dobj.idObj;
+			//Calcolate position
+			Point originObj = so.meshData.second;
+			double cm_x = CGAL::to_double(originObj.x());
+			double cm_y = CGAL::to_double(originObj.y());
+			double cm_z = CGAL::to_double(originObj.z());
+
+			dobj.position = LVector3(cm_x+0.0, cm_y+0.0, cm_z+0.0);
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(1.0, 0.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+
+		}
+
+		//Save Frame
+		LarmorPhysx::saveFrame(frame);
+
+	}
+
+
 }
 

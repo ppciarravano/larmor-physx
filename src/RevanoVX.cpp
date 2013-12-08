@@ -53,7 +53,7 @@
 using namespace LarmorPhysx;
 
 int main(int argc, char** argv) {
-	std::cout << "Revano VX" << std::endl;
+	std::cout << "Revano VX - LarmorPhysx\nAuthor: Pier Paolo Ciarravano\nhttp://www.larmor.com" << std::endl;
 
 	std::cout << "Start at: " << currentDateTime() << std::endl;
 	CGAL::Timer timer;
@@ -159,10 +159,27 @@ int main(int argc, char** argv) {
 		std::cout << "createFirstFrame_Scene11:" << std::endl;
 		createFirstFrame_Scene11();
 	}
+	if (ConfigManager::action == "createscene12")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene12:" << std::endl;
+		createFirstFrame_Scene12();
+	}
 	if (ConfigManager::action == "explodescene")
 	{
 		std::cout << "generateExplodingScene():" << std::endl;
 		generateExplodingScene();
+	}
+	if (ConfigManager::action == "rotatescene")
+	{
+		std::cout << "generateRotatingScene():" << std::endl;
+		generateRotatingScene();
+	}
+	if (ConfigManager::action == "rotexpscene")
+	{
+		std::cout << "generateRotatingExplodingScene():" << std::endl;
+		generateRotatingExplodingScene();
 	}
 
 

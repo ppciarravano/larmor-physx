@@ -279,7 +279,11 @@ namespace LarmorPhysx
 		fprintf(oFile, "	Display \"renders/frame_%s.tif\" \"file\" \"rgb\"\n", bufferImageNumber); //bufferFileNumber
 		fprintf(oFile, "	ReadArchive \"cameras/camera_%s.rib\"\n", bufferFileNumber);
 		fprintf(oFile, "	WorldBegin\n");
+		//Uncomment to rotate lights (Used for dragon shatter animation)
+		//fprintf(oFile, "	TransformBegin\n"); //For rotate lights
+		//fprintf(oFile, "		Rotate %f 0 1 0\n", idFrame/135.0); //For rotate lights
 		fprintf(oFile, "		ReadArchive \"lights/lights_1.rib\"\n");
+		//fprintf(oFile, "	TransformEnd\n"); //For rotate lights
 		fprintf(oFile, "	    ReadArchive \"scenes/scene_%s.rib\"\n", bufferFileNumber);
 		if (LarmorPhysx::ConfigManager::is_ground_present)
 		{
@@ -311,6 +315,11 @@ namespace LarmorPhysx
 		fprintf(oFile, "Translate 0 -3 40\n");
 		fprintf(oFile, "Rotate -15 1 0 0\n");
 		fprintf(oFile, "Rotate 45 0 1 0\n\n");
+
+		//For Dragon shatter animation
+		//fprintf(oFile, "Rotate -18 1 0 0\n");
+		//fprintf(oFile, "Translate 0 -15 48\n");
+		//fprintf(oFile, "Rotate -30 0 1 0\n\n");
 
 		fclose (oFile);
 	}

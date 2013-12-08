@@ -49,7 +49,7 @@
 
 #include <CGAL/Aff_transformation_2.h>
 
-#define DISJOINTMESH_LOG
+//#define DISJOINTMESH_LOG
 
 typedef std::list<unsigned int> ListVisitedInfoIndex;
 
