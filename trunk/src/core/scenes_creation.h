@@ -52,7 +52,10 @@
 namespace LarmorPhysx
 {
 
+	//Used in Dragon shatter static animation
+	void generateRotatingScene();
 	void generateExplodingScene();
+	void generateRotatingExplodingScene();
 
 	// Demo scenes
 	void createFirstFrame_Scene1();
@@ -66,6 +69,7 @@ namespace LarmorPhysx
 	void createFirstFrame_Scene9();
 	void createFirstFrame_Scene10();
 	void createFirstFrame_Scene11();
+	void createFirstFrame_Scene12();
 
 }
 

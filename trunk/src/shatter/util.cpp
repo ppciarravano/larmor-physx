@@ -189,6 +189,11 @@ std::list<Triangle> readPlyMeshToTriangles(const char* meshFile)
 	}
 	printf("Reading %d vertex and %d faces...\n", numVertexs, numFaces);
 
+	//For dragon shatter static animation
+	double xTrs = (-10.8324 +9.65662) / 2.0;
+	double yTrs = ( 5.2729 +19.7173) / 2.0;
+	double zTrs = (-5.04143 +4.12075) / 2.0;
+
 	//Reading Vertexs
 	double xp, yp, zp;
 	double t1, t2;
@@ -199,6 +204,8 @@ std::list<Triangle> readPlyMeshToTriangles(const char* meshFile)
 		//xp = xp /1000; yp = yp /1000; zp = zp /1000;
 		//printf("%f,%f,%f\n", xp, yp, zp );
 		Point vertex(xp, yp, zp);
+		//For dragon shatter static animation
+		//Point vertex(xp * 100.0 - xTrs, yp * 100.0 - yTrs, zp * 100.0 - zTrs);
 		vertices.push_back(vertex);
 	}
 	//printf("%f,%f,%f\n", xp, yp, zp );

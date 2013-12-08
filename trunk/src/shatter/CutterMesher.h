@@ -31,7 +31,7 @@
 #define CUTTERMESHER_H_
 
 //Use Delaunay mesh triangulation for cutted faces: it require more cpu time but it give better results
-#define CUTTERMESHER_USE_DELAUNAY
+//#define CUTTERMESHER_USE_DELAUNAY
 
 //Use only exact precision for face building
 //#define CUTTERMESHER_USE_ONLY_EXACT_FACE_BUILDER
