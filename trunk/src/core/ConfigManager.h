@@ -74,6 +74,7 @@ namespace LarmorPhysx
 			static bool rib_motion_blur;
 			static int rib_frames_per_second;
 			static int rib_frames_per_motion_blur;
+			static int frames_per_step_animationviewer;
 			static int steps_per_second;
 			static int internal_sub_steps;
 			static int total_anim_steps;

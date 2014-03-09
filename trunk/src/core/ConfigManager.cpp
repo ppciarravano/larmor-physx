@@ -52,6 +52,7 @@ namespace LarmorPhysx
 	bool ConfigManager::rib_motion_blur = false;
 	int ConfigManager::rib_frames_per_second = 30;
 	int ConfigManager::rib_frames_per_motion_blur = 10;
+	int ConfigManager::frames_per_step_animationviewer = 1;
 	int ConfigManager::steps_per_second = 60;
 	int ConfigManager::internal_sub_steps = 4;
 	int ConfigManager::total_anim_steps = 120;
@@ -129,6 +130,8 @@ namespace LarmorPhysx
 				desc.add_options()
 					("rib_frames_per_motion_blur", po::value<int>( &rib_frames_per_motion_blur ), "rib_frames_per_motion_blur" );
 				desc.add_options()
+					("frames_per_step_animationviewer", po::value<int>( &frames_per_step_animationviewer ), "frames_per_step_animationviewer" );
+				desc.add_options()
 					("steps_per_second", po::value<int>( &steps_per_second ), "steps_per_second" );
 				desc.add_options()
 					("internal_sub_steps", po::value<int>( &internal_sub_steps ), "internal_sub_steps" );
@@ -161,6 +164,7 @@ namespace LarmorPhysx
 				std::cout << "CONFIG PARAM: rib_motion_blur = " << rib_motion_blur << std::endl;
 				std::cout << "CONFIG PARAM: rib_frames_per_second = " << rib_frames_per_second << std::endl;
 				std::cout << "CONFIG PARAM: rib_frames_per_motion_blur = " << rib_frames_per_motion_blur << std::endl;
+				std::cout << "CONFIG PARAM: frames_per_step_animationviewer = " << frames_per_step_animationviewer << std::endl;
 				std::cout << "CONFIG PARAM: steps_per_second = " << steps_per_second << std::endl;
 				std::cout << "CONFIG PARAM: internal_sub_steps = " << internal_sub_steps << std::endl;
 				std::cout << "CONFIG PARAM: total_anim_steps = " << total_anim_steps << std::endl;

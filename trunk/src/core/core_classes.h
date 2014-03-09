@@ -104,9 +104,9 @@ namespace LarmorPhysx
 			LReal mass;
 			LReal density;
 			LVector3 inertia;
-			//LReal friction;
-			//LReal restitution;
-			//bool isConcave; //if false use bullet physics convexhull
+			LReal friction;
+			LReal restitution;
+			bool isConvex; //if true use bullet physics btConvexHullShape
 			//unsigned int idMaterial; //To store the material id for rendering: actually it could be done using a new TriangleInfo attribute
 			LReal breakCoefficient; //specify the volume factor of shattered pieces: number pieces should be = volume / breakCoefficient
 			LReal hardnessCoefficient; //collision force module due for the shatter
@@ -122,6 +122,7 @@ namespace LarmorPhysx
 		public:
 			unsigned int idObj;
 			unsigned int idGroup; //The objects that share the same idGroup have combined restitution = 0, is in DynamicObject for simplicity and because it is related to dynamic behavior
+			unsigned int shatterLevel; //Number of recursive shatter from an object come from
 			LVector3 position;
 			LReal rotationAngle; //Radiant angle
 			LVector3 rotationAxis;
@@ -209,6 +210,23 @@ namespace LarmorPhysx
 	};
 
 
+	//Camera
+	class Camera {
+
+		public:
+			unsigned int idFrame;
+			LVector3 eyePosition;
+			LVector3 lookAt;
+			//LVector3 upVector; //TODO: not used
+			bool keyframe;
+
+			Camera() {
+				keyframe = false;
+			}
+
+	};
+
+
 	//load and save functions StaticObject
 	void saveStaticObject(StaticObject &staticObject, const char * filename);
 	void saveStaticObject(StaticObject &staticObject);
@@ -223,6 +241,12 @@ namespace LarmorPhysx
 	Frame loadFrame(int idFrame);
 	Frame loadPFrame(int idFrame);
 
+	//load and save functions Camera, and camera path building
+	void saveCamera(Camera &camera, const char * filename);
+	void saveCamera(Camera &camera);
+	Camera loadCamera(const char * filename);
+	Camera loadCamera(int idFrame);
+	void computeCubicSplineCameraPath();
 
 	class LarmorException: public std::exception
 	{
@@ -299,9 +323,9 @@ namespace boost {
 			ar & t.mass;
 			ar & t.density;
 			ar & t.inertia;
-			//ar & t.friction;
-			//ar & t.restitution;
-			//ar & t.isConcave;
+			ar & t.friction;
+			ar & t.restitution;
+			ar & t.isConvex;
 			//ar & t.idMaterial;
 			ar & t.breakCoefficient;
 			ar & t.hardnessCoefficient;
@@ -314,6 +338,7 @@ namespace boost {
 		{
 			ar & t.idObj;
 			ar & t.idGroup;
+			ar & t.shatterLevel;
 			ar & t.position;
 			ar & t.rotationAngle;
 			ar & t.rotationAxis;
@@ -352,6 +377,17 @@ namespace boost {
 		inline void serialize(Archive & ar, LarmorPhysx::Scene & t, const unsigned int file_version)
 		{
 			ar & t.stepsPerSecond;
+		}
+
+		//Camera
+		template<class Archive>
+		inline void serialize(Archive & ar, LarmorPhysx::Camera & t, const unsigned int file_version)
+		{
+			ar & t.idFrame;
+			ar & t.eyePosition;
+			ar & t.lookAt;
+			//ar & t.upVector; //TODO: not used
+			ar & t.keyframe;
 		}
 
 

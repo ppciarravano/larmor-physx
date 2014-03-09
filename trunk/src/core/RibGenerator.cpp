@@ -312,9 +312,42 @@ namespace LarmorPhysx
 		//fprintf(oFile, "Rotate -30 1 0 0\n");
 		//fprintf(oFile, "Rotate 45 0 1 0\n\n");
 
-		fprintf(oFile, "Translate 0 -3 40\n");
-		fprintf(oFile, "Rotate -15 1 0 0\n");
-		fprintf(oFile, "Rotate 45 0 1 0\n\n");
+		Camera camera = loadCamera(idFrame);
+		if (camera.eyePosition == LVector3(0.0, 0.0, 0.0))
+		{
+			fprintf(oFile, "Translate 0 -3 40\n");
+			fprintf(oFile, "Rotate -15 1 0 0\n");
+			fprintf(oFile, "Rotate 45 0 1 0\n\n");
+		}
+		else
+		{
+
+			//Camera with position and lookat
+			float tEyeX = camera.eyePosition.x - camera.lookAt.x;
+			float tEyeY = camera.eyePosition.y - camera.lookAt.y;
+			float tEyeZ = camera.eyePosition.z - camera.lookAt.z;
+			float rc = sqrt(tEyeX*tEyeX + tEyeY*tEyeY + tEyeZ*tEyeZ);
+			float tc = acos(tEyeY / rc) * 180.0 / CONV_PI - 90;
+			float pc = - atan2(tEyeZ , tEyeX) * 180.0 / CONV_PI + 90;
+			fprintf(oFile, "Rotate %f 1 0 0 #Camera lookat tilt\n", tc);
+			fprintf(oFile, "Rotate %f 0 1 0 #Camera lookat rotate\n", pc);
+			fprintf(oFile, "Translate %f %f %f #Camera position\n", -camera.eyePosition.x, -camera.eyePosition.y, camera.eyePosition.z);
+			fprintf(oFile, "Scale 1 1 -1 #Right-hand Coordinate System\n");
+
+			/*
+			//Camera position with lookat at origin (0,0,0)
+			float r = sqrt(camera.eyePosition.x*camera.eyePosition.x +
+					camera.eyePosition.y*camera.eyePosition.y +
+					camera.eyePosition.z*camera.eyePosition.z);
+			float t = acos(camera.eyePosition.y / r) * 180.0 / CONV_PI - 90;
+			float p = - atan2(camera.eyePosition.z , camera.eyePosition.x) * 180.0 / CONV_PI + 90;
+			fprintf(oFile, "Translate 0 0 %f #Camera position\n", r);
+			fprintf(oFile, "Rotate %f 1 0 0 #Camera tilt\n", t);
+			fprintf(oFile, "Rotate %f 0 1 0 #Camera rotate\n", p);
+			fprintf(oFile, "Scale 1 1 -1 #Right-hand Coordinate System\n");
+			*/
+
+		}
 
 		//For Dragon shatter animation
 		//fprintf(oFile, "Rotate -18 1 0 0\n");
