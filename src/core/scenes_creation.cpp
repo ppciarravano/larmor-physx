@@ -1749,7 +1749,7 @@ namespace LarmorPhysx
 
 
 		//Stanford Dragon mesh
-		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_recon\\dragon_vrip.ply"); //dragon_vrip_res2.ply
+		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_recon\\dragon_vrip_res3.ply"); //dragon_vrip_res2.ply
 		//std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
 		//std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 50);
 		////std::list<Triangle> outTriangles = readedTriangles;
@@ -1832,6 +1832,846 @@ namespace LarmorPhysx
 
 	}
 
+
+	//Bricks wall and sphere, convex test
+	void createFirstFrame_Scene13()
+	{
+		std::cout << "createFirstFrame_Scene13 Starting..." << std::endl;
+
+		//Create the brick
+		std::list<Triangle> readedTriangles;
+
+		float a = 0.5;
+		float b = 0.5;
+		float c = 1.0;
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+
+		std::list<Triangle> outTriangles = readedTriangles;
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+
+		//No voronoi
+		TrianglesInfoList cutInfo = createNewTriangleInfoList(outTriangles);
+		MeshData cubeMeshData = MeshData(outTriangles, cutInfo);
+		TranslatedMeshData cubeTranslatedMeshData = TranslatedMeshData(cubeMeshData, Point(0.0, 0.0, 0.0));
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		bool isFirstBrick = true;
+		double fvolume = 0.0;
+		double fmass = 0.0;
+		double finertiax = 0.0;
+		double finertiay = 0.0;
+		double finertiaz = 0.0;
+		for (int w = 0; w < 1; ++w) //different wall in z
+			for (int h = 0; h < 20; ++h) //bricks in y
+				for (int r = -10; r < 10; ++r) //bricks in x
+		{
+			//Add brick
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = cubeTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 0.4;
+			so.hardnessCoefficient = 30.0;
+			so.simplifyMesh = TrianglesList();
+			if (isFirstBrick)
+			{
+				so.calculateVolumeMassInertia();
+				isFirstBrick = false;
+				fvolume = so.volume;
+				fmass = so.mass;
+				finertiax = so.inertia.x;
+				finertiay = so.inertia.y;
+				finertiaz = so.inertia.z;
+			}
+			else
+			{
+				so.volume = fvolume;
+				so.mass = fmass;
+				so.inertia.x = finertiax;
+				so.inertia.y = finertiay;
+				so.inertia.z = finertiaz;
+			}
+			std::cout << "---> Object Mass:" << so.mass
+								<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
+
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 1; //All the bricks are in the same group to avoid the restitution brick-to-brick
+			dobj.shatterLevel = 0;
+			//Add a translation on Y axis of 12.0
+			dobj.position = LVector3(0.0 - w*5, 2*b*h + b, 2*c*r + 0.0 +  (h % 2)*c);
+			//dobj.rotationAngle = 0.1 * r;
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+
+		//Add sphere
+		std::list<Triangle> readedTrianglesSphere = readOffMeshToTriangles("mesh_sphere_05.off");
+		std::cout << "readedTrianglesSphere size:" << readedTrianglesSphere.size() << std::endl;
+		readedTrianglesSphere = scaleAndCenterMesh(readedTrianglesSphere, 2.0);
+		//No voronoi
+		TrianglesInfoList cutInfoSphere = createNewTriangleInfoList(readedTrianglesSphere);
+		MeshData sphereMeshData = MeshData(readedTrianglesSphere, cutInfoSphere);
+		TranslatedMeshData sphereTranslatedMeshData = TranslatedMeshData(sphereMeshData, Point(0.0, 0.0, 0.0));
+		//Add to frame
+		frame.lastCreatedIdObj++;
+		std::cout << "***** Creating Object Sphere N." << frame.lastCreatedIdObj << std::endl;
+		//Create StaticObject
+		StaticObject so;
+		so.idObj = frame.lastCreatedIdObj;
+		so.idParentObj = so.idObj;
+		so.meshData = sphereTranslatedMeshData;
+		so.density = 10.0;
+		so.isConvex = true;
+		so.breakCoefficient = 5.0;
+		so.hardnessCoefficient = 5000.0;
+		so.simplifyMesh = TrianglesList();
+		so.calculateVolumeMassInertia();
+		std::cout << "---> Object Mass:" << so.mass
+								<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
+		//Save staticObject
+		LarmorPhysx::saveStaticObject(so);
+		//Create DynamicObject
+		DynamicObject dobj;
+		dobj.idObj = frame.lastCreatedIdObj;
+		dobj.idGroup = 2;
+		dobj.shatterLevel = 0;
+		//Add a translation on Y axis of 12.0
+		dobj.position = LVector3(30.0, 10.0, 0.0);
+		//dobj.rotationAngle = 0.1 * r;
+		dobj.rotationAngle = 0.0;
+		dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+		dobj.linearVelocity = LVector3(-30.0, 0.0, 0.0); //-100, 8, 0
+		dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+		dobj.isDynamic = true;
+		//Add in frame
+		frame.dynamicObjects.push_back(dobj);
+
+
+		//Save Frame
+		LarmorPhysx::saveFrame(frame);
+
+	}
+
+
+	//Test for axis and camera
+	void createFirstFrame_Scene14()
+	{
+		std::cout << "createFirstFrame_Scene14 Starting..." << std::endl;
+
+		//Create the brick
+		std::list<Triangle> readedTriangles;
+
+		float a = 0.5;
+		float b = 0.5;
+		float c = 0.5;
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+
+		std::list<Triangle> outTriangles = readedTriangles;
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+
+		//No voronoi
+		TrianglesInfoList cutInfo = createNewTriangleInfoList(outTriangles);
+		MeshData cubeMeshData = MeshData(outTriangles, cutInfo);
+		TranslatedMeshData cubeTranslatedMeshData = TranslatedMeshData(cubeMeshData, Point(0.0, 0.0, 0.0));
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		//0: origin, 1:x, 2:y, 3:z
+		for (int ax = 0; ax < 4; ++ax)
+			for (int n = 0; n < 1 + ax; ++n)
+		{
+			//Add brick
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = cubeTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 0.4;
+			so.hardnessCoefficient = 30.0;
+			so.simplifyMesh = TrianglesList();
+			so.calculateVolumeMassInertia();
+
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 1; //All the bricks are in the same group to avoid the restitution brick-to-brick
+			dobj.shatterLevel = 0;
+
+			if (ax == 0)
+			{
+				//Origin
+				dobj.position = LVector3(0.0, 0.5, 0.0);
+			}
+			else if (ax == 1)
+			{
+				//X
+				dobj.position = LVector3(30.0 + 1.2*n, 0.5, 0.0);
+			}
+			else if (ax == 2)
+			{
+				//Y
+				dobj.position = LVector3(0.0, 0.5 + 30.0 + 1.2*n, 0.0);
+			}
+			else if (ax == 3)
+			{
+				//Z
+				dobj.position = LVector3(0.0, 0.5, 0.0 + 30.0 + 1.2*n);
+			}
+
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+
+		//Save Frames and camera animation
+		float elev = 50.0;
+		unsigned int idf = 0;
+		for (int rot = 0; rot < 10; rot++)
+			for (int ang = 0; ang < 360; ang += 10)
+		{
+			frame.idFrame = idf;
+			float xp = cos(ang * CONV_PI / 180.0)*(50.0-abs(elev) + 5.0);
+			float yp = elev;
+			float zp = sin(ang * CONV_PI / 180.0)*(50.0-abs(elev) + 5.0);
+
+			//DynamicObjectVector::iterator dobjIter;
+			//dobjIter = frame.dynamicObjects.begin();
+			//dobjIter->position = LVector3(xp, yp, zp);
+			LarmorPhysx::saveFrame(frame);
+
+			Camera camera;
+			camera.idFrame = idf;
+			camera.eyePosition = LVector3(xp, yp, zp);
+			camera.lookAt = LVector3(0.0, 0.0, 0.0);
+			//Save camera
+			saveCamera(camera);
+
+			idf++;
+			elev -= (50.0 * 2.0) / (360.0 / 10.0 * 10.0);
+		}
+
+
+	}
+
+
+	//Test for axis and camera
+	void createFirstFrame_Scene15()
+	{
+		std::cout << "createFirstFrame_Scene15 Starting..." << std::endl;
+
+		//Create the brick
+		std::list<Triangle> readedTriangles;
+
+		float a = 0.5;
+		float b = 0.5;
+		float c = 0.5;
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+
+		std::list<Triangle> outTriangles = readedTriangles;
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+
+		//No voronoi
+		TrianglesInfoList cutInfo = createNewTriangleInfoList(outTriangles);
+		MeshData cubeMeshData = MeshData(outTriangles, cutInfo);
+		TranslatedMeshData cubeTranslatedMeshData = TranslatedMeshData(cubeMeshData, Point(0.0, 0.0, 0.0));
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		//0: origin, 1:x, 2:y, 3:z
+		for (int ax = 0; ax < 4; ++ax)
+			for (int n = 0; n < 1 + ax; ++n)
+		{
+			//Add brick
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = cubeTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 0.4;
+			so.hardnessCoefficient = 30.0;
+			so.simplifyMesh = TrianglesList();
+			so.calculateVolumeMassInertia();
+
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 1; //All the bricks are in the same group to avoid the restitution brick-to-brick
+			dobj.shatterLevel = 0;
+
+			if (ax == 0)
+			{
+				//Origin
+				dobj.position = LVector3(0.0, 0.5, 0.0);
+			}
+			else if (ax == 1)
+			{
+				//X
+				dobj.position = LVector3(30.0 + 1.2*n, 0.5, 0.0);
+			}
+			else if (ax == 2)
+			{
+				//Y
+				dobj.position = LVector3(0.0, 0.5 + 30.0 + 1.2*n, 0.0);
+			}
+			else if (ax == 3)
+			{
+				//Z
+				dobj.position = LVector3(0.0, 0.5, 0.0 + 30.0 + 1.2*n);
+			}
+
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+		std::list<KDPoint> pointsPosition = randomPointsInSphere(1000, 50.0);
+		std::list<KDPoint> pointsLookat = randomPointsInSphere(1000, 50.0);
+		std::list<KDPoint>::iterator pointsPositionIter = pointsPosition.begin();
+		std::list<KDPoint>::iterator pointsLookatIter = pointsLookat.begin();
+
+		//Save Frames and camera animation
+		unsigned int idf = 0;
+		for (int fr = 0; fr < 1000; fr++)
+		{
+			frame.idFrame = idf;
+			KDPoint pointPosition = *pointsPositionIter;
+			KDPoint pointLookat = *pointsLookatIter;
+			LVector3 lvecPosition(pointPosition.x(), abs(pointPosition.y()), pointPosition.z());
+			LVector3 lvecLookat(pointLookat.x(), abs(pointLookat.y()), pointLookat.z());
+
+			DynamicObjectVector::iterator dobjIter;
+			dobjIter = frame.dynamicObjects.begin();
+			dobjIter->position = lvecLookat;
+			//Save Frame
+			LarmorPhysx::saveFrame(frame);
+
+			Camera camera;
+			camera.idFrame = idf;
+			camera.eyePosition = lvecPosition;
+			camera.lookAt = lvecLookat;
+			//Save camera
+			saveCamera(camera);
+
+			idf++;
+			pointsPositionIter++;
+			pointsLookatIter++;
+		}
+
+	}
+
+
+	//Tower and shere
+	void createFirstFrame_Scene16()
+	{
+		std::cout << "createFirstFrame_Scene16 Starting..." << std::endl;
+
+		//Create the brick
+		std::list<Triangle> readedTriangles;
+
+		float a = 0.1; //Spessore
+		float b = 0.5; //Altezza
+		float c = 2.5; //Lunghezza
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+
+		std::list<Triangle> outTriangles = readedTriangles;
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+
+		//No voronoi
+		TrianglesInfoList cutInfo = createNewTriangleInfoList(outTriangles);
+		MeshData cubeMeshData = MeshData(outTriangles, cutInfo);
+		TranslatedMeshData cubeTranslatedMeshData = TranslatedMeshData(cubeMeshData, Point(0.0, 0.0, 0.0));
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		bool isFirstBrick = true;
+		double fvolume = 0.0;
+		double fmass = 0.0;
+		double finertiax = 0.0;
+		double finertiay = 0.0;
+		double finertiaz = 0.0;
+
+		for (int h = 0; h < 30; ++h) //bricks in y
+			for (int r = 0; r < 360; r += 30) //bricks angle
+		{
+			//Add brick
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = cubeTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 0.4;
+			so.hardnessCoefficient = 30.0;
+			so.simplifyMesh = TrianglesList();
+			if (isFirstBrick)
+			{
+				so.calculateVolumeMassInertia();
+				isFirstBrick = false;
+				fvolume = so.volume;
+				fmass = so.mass;
+				finertiax = so.inertia.x;
+				finertiay = so.inertia.y;
+				finertiaz = so.inertia.z;
+			}
+			else
+			{
+				so.volume = fvolume;
+				so.mass = fmass;
+				so.inertia.x = finertiax;
+				so.inertia.y = finertiay;
+				so.inertia.z = finertiaz;
+			}
+			std::cout << "---> Object Mass:" << so.mass
+								<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
+
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 1; //All the bricks are in the same group to avoid the restitution brick-to-brick
+			dobj.shatterLevel = 0;
+			//position:
+			float radiantAngle = (r + (h % 2) * 15)*CONV_PI/180.0 ;
+			float xp = cos(radiantAngle) * 12.0;
+			float yp = sin(radiantAngle) * 12.0;
+			dobj.position = LVector3(xp, 2*b*h + b, yp);
+			dobj.rotationAngle = - radiantAngle;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+
+		//Add sphere
+		std::list<Triangle> readedTrianglesSphere = readOffMeshToTriangles("mesh_sphere_05.off");
+		std::cout << "readedTrianglesSphere size:" << readedTrianglesSphere.size() << std::endl;
+		readedTrianglesSphere = scaleAndCenterMesh(readedTrianglesSphere, 2.0);
+		//No voronoi
+		TrianglesInfoList cutInfoSphere = createNewTriangleInfoList(readedTrianglesSphere);
+		MeshData sphereMeshData = MeshData(readedTrianglesSphere, cutInfoSphere);
+		TranslatedMeshData sphereTranslatedMeshData = TranslatedMeshData(sphereMeshData, Point(0.0, 0.0, 0.0));
+		//Add to frame
+		frame.lastCreatedIdObj++;
+		std::cout << "***** Creating Object Sphere N." << frame.lastCreatedIdObj << std::endl;
+		//Create StaticObject
+		StaticObject so;
+		so.idObj = frame.lastCreatedIdObj;
+		so.idParentObj = so.idObj;
+		so.meshData = sphereTranslatedMeshData;
+		so.density = 10.0;
+		so.isConvex = true;
+		so.breakCoefficient = 5.0;
+		so.hardnessCoefficient = 5000.0;
+		so.simplifyMesh = TrianglesList();
+		so.calculateVolumeMassInertia();
+		std::cout << "---> Object Mass:" << so.mass
+								<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
+		//Save staticObject
+		LarmorPhysx::saveStaticObject(so);
+		//Create DynamicObject
+		DynamicObject dobj;
+		dobj.idObj = frame.lastCreatedIdObj;
+		dobj.idGroup = 2;
+		dobj.shatterLevel = 0;
+		//Add a translation on Y axis of 12.0
+		dobj.position = LVector3(30.0, 10.0, 0.0);
+		//dobj.rotationAngle = 0.1 * r;
+		dobj.rotationAngle = 0.0;
+		dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+		dobj.linearVelocity = LVector3(-30.0, 0.0, 0.0); //-100, 8, 0
+		dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+		dobj.isDynamic = true;
+		//Add in frame
+		frame.dynamicObjects.push_back(dobj);
+
+
+		//Save Frame
+		LarmorPhysx::saveFrame(frame);
+
+	}
+
+
+	//Muro solido e sfera convex
+	void createFirstFrame_Scene17()
+	{
+		std::cout << "createFirstFrame_Scene17 Starting..." << std::endl;
+
+		//Create wall box
+		std::list<Triangle> readedTriangles;
+
+		float a = 0.1;//Spessore
+		float b = 10.0;//Altezza
+		float c = 20.0;//Lunghezza
+		Point a1(-a, b, c);
+		Point b1(-a, -b, c);
+		Point c1(a, -b, c);
+		Point d1(a, b, c);
+		Point a2(-a, b, -c);
+		Point b2(-a, -b, -c);
+		Point c2(a, -b, -c);
+		Point d2(a, b, -c);
+		readedTriangles.push_back(Triangle(a1,d1,d2));
+		readedTriangles.push_back(Triangle(d2,a2,a1));
+		readedTriangles.push_back(Triangle(d1,c1,c2));
+		readedTriangles.push_back(Triangle(c2,d2,d1));
+		readedTriangles.push_back(Triangle(c1,b1,b2));
+		readedTriangles.push_back(Triangle(b2,c2,c1));
+		readedTriangles.push_back(Triangle(b1,a1,a2));
+		readedTriangles.push_back(Triangle(a2,b2,b1));
+		readedTriangles.push_back(Triangle(a1,b1,c1));
+		readedTriangles.push_back(Triangle(c1,d1,a1));
+		readedTriangles.push_back(Triangle(a2,d2,c2));
+		readedTriangles.push_back(Triangle(c2,b2,a2));
+
+		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
+
+		std::list<Triangle> outTriangles = readedTriangles;
+		std::cout << "Readed Mesh" << std::endl;
+		readedTriangles.clear();
+
+		//No voronoi
+		TrianglesInfoList cutInfo = createNewTriangleInfoList(outTriangles);
+		MeshData cubeMeshData = MeshData(outTriangles, cutInfo);
+		TranslatedMeshData cubeTranslatedMeshData = TranslatedMeshData(cubeMeshData, Point(0.0, 0.0, 0.0));
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+		{
+			//Add box wall
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = cubeTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 0.4;
+			so.hardnessCoefficient = 150.0;
+			so.simplifyMesh = TrianglesList();
+			so.calculateVolumeMassInertia();
+			std::cout << "---> Object Mass:" << so.mass
+					<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 1;
+			dobj.shatterLevel = 0;
+			//Add a translation on Y axis of 12.0
+			dobj.position = LVector3(0.0, 10.0, 0.0);
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+		{
+			//Add sphere
+			std::list<Triangle> readedTrianglesSphere = readOffMeshToTriangles("mesh_sphere_05.off");
+			std::cout << "readedTrianglesSphere size:" << readedTrianglesSphere.size() << std::endl;
+			readedTrianglesSphere = scaleAndCenterMesh(readedTrianglesSphere, 2.0);
+			//No voronoi
+			TrianglesInfoList cutInfoSphere = createNewTriangleInfoList(readedTrianglesSphere);
+			MeshData sphereMeshData = MeshData(readedTrianglesSphere, cutInfoSphere);
+			TranslatedMeshData sphereTranslatedMeshData = TranslatedMeshData(sphereMeshData, Point(0.0, 0.0, 0.0));
+			//Add to frame
+			frame.lastCreatedIdObj++;
+			std::cout << "***** Creating Object Sphere N." << frame.lastCreatedIdObj << std::endl;
+			//Create StaticObject
+			StaticObject so;
+			so.idObj = frame.lastCreatedIdObj;
+			so.idParentObj = so.idObj;
+			so.meshData = sphereTranslatedMeshData;
+			so.density = 10.0;
+			so.isConvex = true;
+			so.breakCoefficient = 5.0;
+			so.hardnessCoefficient = 50000.0;
+			so.simplifyMesh = TrianglesList();
+			so.calculateVolumeMassInertia();
+			//Save staticObject
+			LarmorPhysx::saveStaticObject(so);
+			//Create DynamicObject
+			DynamicObject dobj;
+			dobj.idObj = frame.lastCreatedIdObj;
+			dobj.idGroup = 2;
+			dobj.shatterLevel = 0;
+			//Add a translation on Y axis of 12.0
+			dobj.position = LVector3(30.0, 10.0, 3.0);
+			//dobj.rotationAngle = 0.1 * r;
+			dobj.rotationAngle = 0.0;
+			dobj.rotationAxis = LVector3(0.0, 1.0, 0.0);
+			dobj.linearVelocity = LVector3(-100.0, 8.0, 0.0);
+			dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
+			dobj.isDynamic = true;
+			//Add in frame
+			frame.dynamicObjects.push_back(dobj);
+		}
+
+		//Save Frame
+		LarmorPhysx::saveFrame(frame);
+
+	}
+
+
+	//Due sfere che si vengono incontro e collidono in (0,y,0)
+	void createFirstFrame_Scene18()
+	{
+		std::cout << "createFirstFrame_Scene18 Starting..." << std::endl;
+
+		//Create Frame
+		Frame frame;
+		frame.idFrame = 0;
+		frame.timePosition = 0.0;
+		frame.lastCreatedIdObj = 0;
+
+
+		//Add sphere
+		std::list<Triangle> readedTrianglesSphere = readOffMeshToTriangles("mesh_sphere_05.off");
+		std::cout << "readedTrianglesSphere size:" << readedTrianglesSphere.size() << std::endl;
+		readedTrianglesSphere = scaleAndCenterMesh(readedTrianglesSphere, 2.0);
+		//No voronoi
+		TrianglesInfoList cutInfoSphere = createNewTriangleInfoList(readedTrianglesSphere);
+		MeshData sphereMeshData = MeshData(readedTrianglesSphere, cutInfoSphere);
+		TranslatedMeshData sphereTranslatedMeshData = TranslatedMeshData(sphereMeshData, Point(0.0, 0.0, 0.0));
+
+		//Add to frame
+		frame.lastCreatedIdObj++;
+		std::cout << "***** Creating Object Sphere N." << frame.lastCreatedIdObj << std::endl;
+		//Create StaticObject
+		StaticObject so1;
+		so1.idObj = frame.lastCreatedIdObj;
+		so1.idParentObj = 0;
+		so1.meshData = sphereTranslatedMeshData;
+		so1.density = 10.0;
+		so1.breakCoefficient = 5.0;
+		so1.hardnessCoefficient = 100.0;
+		so1.isConvex = true;
+		so1.simplifyMesh = TrianglesList();
+		so1.calculateVolumeMassInertia();
+		std::cout << "---> Object Mass:" << so1.mass
+							<< " Inertia: (" << so1.inertia.x << ", " << so1.inertia.y << ", " << so1.inertia.z << ")" << std::endl;
+		//Mass and inertia
+		//so1.mass = 100.0 * 100.0;
+		//so1.inertia.x = 50.0 * 100.0;
+		//so1.inertia.y = 50.0 * 100.0;
+		//so1.inertia.z = 50.0 * 100.0;
+		//Save staticObject
+		LarmorPhysx::saveStaticObject(so1);
+		//Create DynamicObject
+		DynamicObject dobj1;
+		dobj1.idObj = frame.lastCreatedIdObj;
+		dobj1.idGroup = 1;
+		dobj1.shatterLevel = 0;
+		//Add a translation on Y axis of 12.0
+		dobj1.position = LVector3(30.0, 12.0, 0.0);
+		dobj1.rotationAngle = 0.0;
+		dobj1.rotationAxis = LVector3(0.0, 1.0, 0.0);
+		dobj1.linearVelocity = LVector3(-30.0, 0.0, 0.0);
+		dobj1.angularVelocity = LVector3(0.0, 0.0, 0.0);
+		dobj1.isDynamic = true;
+		//Add in frame
+		frame.dynamicObjects.push_back(dobj1);
+
+		//Add to frame
+		frame.lastCreatedIdObj++;
+		std::cout << "***** Creating Object Sphere N." << frame.lastCreatedIdObj << std::endl;
+		//Create StaticObject
+		StaticObject so2;
+		so2.idObj = frame.lastCreatedIdObj;
+		so2.idParentObj = 0;
+		so2.meshData = sphereTranslatedMeshData;
+		so2.density = 10.0;
+		so2.breakCoefficient = 5.0;
+		so2.hardnessCoefficient = 100.0;
+		so2.isConvex = true;
+		so2.simplifyMesh = TrianglesList();
+		so2.calculateVolumeMassInertia();
+		std::cout << "---> Object Mass:" << so2.mass
+							<< " Inertia: (" << so2.inertia.x << ", " << so2.inertia.y << ", " << so2.inertia.z << ")" << std::endl;
+		//Mass and inertia
+		//so2.mass = 100.0 * 100.0;
+		//so2.inertia.x = 50.0 * 100.0;
+		//so2.inertia.y = 50.0 * 100.0;
+		//so2.inertia.z = 50.0 * 100.0;
+		//Save staticObject
+		LarmorPhysx::saveStaticObject(so2);
+		//Create DynamicObject
+		DynamicObject dobj2;
+		dobj2.idObj = frame.lastCreatedIdObj;
+		dobj2.idGroup = 2;
+		dobj2.shatterLevel = 0;
+		//Add a translation on Y axis of 12.0
+		dobj2.position = LVector3(-30.0, 12.0, 0.0);
+		dobj2.rotationAngle = 0.0;
+		dobj2.rotationAxis = LVector3(0.0, 1.0, 0.0);
+		dobj2.linearVelocity = LVector3(30.0, 0.0, 0.0);
+		dobj2.angularVelocity = LVector3(0.0, 0.0, 0.0);
+		dobj2.isDynamic = true;
+		//Add in frame
+		frame.dynamicObjects.push_back(dobj2);
+
+		//Save Frame
+		LarmorPhysx::saveFrame(frame);
+
+	}
 
 }
 

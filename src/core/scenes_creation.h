@@ -70,6 +70,12 @@ namespace LarmorPhysx
 	void createFirstFrame_Scene10();
 	void createFirstFrame_Scene11();
 	void createFirstFrame_Scene12();
+	void createFirstFrame_Scene13();
+	void createFirstFrame_Scene14();
+	void createFirstFrame_Scene15();
+	void createFirstFrame_Scene16();
+	void createFirstFrame_Scene17();
+	void createFirstFrame_Scene18();
 
 }
 

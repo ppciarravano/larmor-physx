@@ -41,7 +41,7 @@ extern int gNumSplitImpulseRecoveries;
 extern int gNumGjkChecks;
 #endif
 
-//#defind LOG_COLLISION_CALLBACK
+//#define LOG_COLLISION_CALLBACK
 
 namespace LarmorPhysx
 {
@@ -306,6 +306,140 @@ namespace LarmorPhysx
 			}
 
 
+			/* OK
+			//Shatter action algorithm
+			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
+			{
+
+				//Shatter condition
+				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 3))
+				{
+					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
+							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
+
+					//Build Complete shattered pieces of mesh
+					int numShatterPieces = dynamicObject->staticObject.volume / dynamicObject->staticObject.breakCoefficient;
+					numShatterPieces = 3;
+					if (numShatterPieces >= 2)
+					{
+						std::cout << " numShatterPieces: " << numShatterPieces << std::endl;
+						//Point parentOriginObj = staticObject.meshData.second;
+						//Call shatter function
+						std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, numShatterPieces, false);
+						std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+
+						return shatterMeshes;
+					}
+					else
+					{
+						std::cout << " ******* NOT SHATTERED numShatterPieces < 2 " << std::endl;
+					}
+				}
+
+				std::list<TranslatedMeshData> shatterMeshes;
+				return shatterMeshes;
+			}
+			*/
+
+
+			/*
+			 unsigned int idObj1;
+			unsigned int idObj2;
+			LVector3 contactPoint;
+			LReal forceModule;
+			LVector3 collisionDirection;
+
+			typedef std::list<Triangle>      TrianglesList;     //Non utilizzato in CutterMesher.cpp
+typedef std::list<TriangleInfo>  TrianglesInfoList; //Non utilizzato in CutterMesher.cpp
+typedef std::pair<TrianglesList, TrianglesInfoList> MeshData;
+typedef std::pair<MeshData,Point> TranslatedMeshData;
+
+LVector3 p = cpMax.contactPoint;
+			 */
+
+			/*
+			//Shatter action algorithm
+			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
+			{
+
+				//Shatter condition
+				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 1))
+				{
+					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
+							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
+
+					//Collision point
+					LVector3 p = cpMax.contactPoint;
+
+					//Call shatter function
+					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 100, false);
+					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_sphereDistributionOnPoint(dynamicObject->staticObject.meshData.first, 100, KDPoint(p.x, p.y, p.z), 1.0, false);
+					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+
+					return shatterMeshes;
+				}
+
+				std::list<TranslatedMeshData> shatterMeshes;
+				return shatterMeshes;
+			}
+			 */
+
+
+			//Shatter action algorithm: wood
+			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
+			{
+
+				//Shatter condition
+				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 1))
+				{
+					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
+							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
+
+					//Collision point
+					LVector3 p = cpMax.contactPoint;
+
+					//std::list<KDPoint> points;
+					//for (int y = -10; y <= 10; ++ y) {
+					//	double number = (rand() % 10) * 0.02;
+					//	KDPoint vp(0.0, y, p.z + number);
+					//	points.push_back(vp);
+					//}
+
+					std::list<KDPoint> points;
+					for (int y = -10; y <= 10; y += 4) {
+						double number = (rand() % 10) * 0.05 / 20.0;
+						KDPoint vp(0.0, y / 20.0 , p.z + number);
+						points.push_back(vp);
+					}
+
+					//Call shatter function
+					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 10, false);
+					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_sphereDistributionOnPoint(dynamicObject->staticObject.meshData.first, 100, KDPoint(p.x, p.y, p.z), 10.0, false);
+					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter(dynamicObject->staticObject.meshData.first, points);
+					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+
+					return shatterMeshes;
+				}
+				/*
+				else if ( (cpMax.forceModule >= 3.0) &&
+						((dynamicObject->shatterLevel == 1) || (dynamicObject->shatterLevel == 2)) )
+				{
+					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
+							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
+
+					//Call shatter function
+					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 2, false);
+					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+
+					return shatterMeshes;
+				}
+				 */
+				std::list<TranslatedMeshData> shatterMeshes;
+				return shatterMeshes;
+			}
+
+
+
 			//Core function for Voronoi Shatter
 			void PhysicsCore::updateWorld()
 			{
@@ -347,141 +481,148 @@ namespace LarmorPhysx
 								if (foundCollision != maxMapCollisionPoint.end())
 								{
 									CollisionPoint cpMax = foundCollision->second;
-									if (cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient)
+
+									//Load dynamicObject->staticObject if not use_memory_for_meshes
+									if (! LarmorPhysx::ConfigManager::use_memory_for_meshes)
 									{
-										std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
-												" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
+										//Load from file
+										dynamicObject->staticObject = LarmorPhysx::loadStaticObject( dynamicObject->idObj );
+									}
+									//else dynamicObject->staticObject should be already in memory
 
-										//Load dynamicObject->staticObject if not use_memory_for_meshes
-										if (! LarmorPhysx::ConfigManager::use_memory_for_meshes)
+									//Apply shattering algorithm to the object
+									std::list<TranslatedMeshData> shatterMeshes = PhysicsCore::shatterObject(dynamicObject, cpMax);
+
+									//Add new shattered meshes to the world
+									if (shatterMeshes.size() > 0)
+									{
+										//Add voronoi pieces to the world
+										unsigned int previousLastCreatedIdObj = stepFrame.lastCreatedIdObj;
+										std::list<TranslatedMeshData>::iterator meshDataInter;
+										for(meshDataInter = shatterMeshes.begin(); meshDataInter != shatterMeshes.end(); ++meshDataInter)
 										{
-											//Load from file
-											dynamicObject->staticObject = LarmorPhysx::loadStaticObject( dynamicObject->idObj );
-										}
-										//else dynamicObject->staticObject should be already in memory
+											TranslatedMeshData meshDataPartTranslated = *meshDataInter;
+											stepFrame.lastCreatedIdObj++;
 
-										//Build Complete shattered pieces of mesh
-										int numShatterPieces = dynamicObject->staticObject.volume / dynamicObject->staticObject.breakCoefficient;
-										if (numShatterPieces >= 2)
-										{
-											std::cout << " numShatterPieces: " << numShatterPieces << std::endl;
-											//Point parentOriginObj = staticObject.meshData.second;
-											//Call shatter function
-											std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, numShatterPieces, false);
-											std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
+											std::cout << " Creating Object idObj:" << stepFrame.lastCreatedIdObj << "  N." << (stepFrame.lastCreatedIdObj - previousLastCreatedIdObj) << "/" << shatterMeshes.size() << std::endl;
 
-											//Add voronoi pieces to the world
-											unsigned int previousLastCreatedIdObj = stepFrame.lastCreatedIdObj;
-											std::list<TranslatedMeshData>::iterator meshDataInter;
-											for(meshDataInter = shatterMeshes.begin(); meshDataInter != shatterMeshes.end(); ++meshDataInter)
+											//Create StaticObject
+											StaticObject so;
+											so.idObj = stepFrame.lastCreatedIdObj;
+											so.idParentObj = dynamicObject->idObj;
+											so.meshData = meshDataPartTranslated;
+											so.density = dynamicObject->staticObject.density;
+											so.friction = dynamicObject->staticObject.friction;
+											so.restitution = dynamicObject->staticObject.restitution;
+											so.isConvex = dynamicObject->staticObject.isConvex;
+											so.breakCoefficient = dynamicObject->staticObject.breakCoefficient;
+											so.hardnessCoefficient = dynamicObject->staticObject.hardnessCoefficient;
+											so.calculateVolumeMassInertia();
+											so.simplifyMesh = TrianglesList();
+											if (ConfigManager::use_simplified_meshes_for_bullet)
 											{
-												TranslatedMeshData meshDataPartTranslated = *meshDataInter;
-												stepFrame.lastCreatedIdObj++;
+												so.simplifyMesh = meshSimplification(so.meshData.first.first, 500);
+											}
 
-												std::cout << " Creating Object idObj:" << stepFrame.lastCreatedIdObj << "  N." << (stepFrame.lastCreatedIdObj - previousLastCreatedIdObj) << "/" << numShatterPieces << std::endl;
+											std::cout << "---> Object Mass:" << so.mass
+													<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
 
-												//Create StaticObject
-												StaticObject so;
-												so.idObj = stepFrame.lastCreatedIdObj;
-												so.idParentObj = dynamicObject->idObj;
-												so.meshData = meshDataPartTranslated;
-												so.density = dynamicObject->staticObject.density;
-												so.breakCoefficient = dynamicObject->staticObject.breakCoefficient;
-												so.hardnessCoefficient = dynamicObject->staticObject.hardnessCoefficient;
-												so.calculateVolumeMassInertia();
-												so.simplifyMesh = TrianglesList();
-												if (ConfigManager::use_simplified_meshes_for_bullet)
+											//Save staticObject
+											LarmorPhysx::saveStaticObject(so);
+
+											//Create DynamicObject
+											DynamicObject dobj;
+											dobj.idObj = stepFrame.lastCreatedIdObj;
+											idGroupCounter++;
+											dobj.idGroup = idGroupCounter; //Each pieces has now a different groupId so m_combinedRestitution = 1.0
+											//dobj.idGroup = dynamicObject->idGroup;
+											dobj.shatterLevel = dynamicObject->shatterLevel + 1;
+											//Calcolate position
+											Point originObj = so.meshData.second;
+											double cm_x = CGAL::to_double(originObj.x());
+											double cm_y = CGAL::to_double(originObj.y());
+											double cm_z = CGAL::to_double(originObj.z());
+											btVector3 cmVector(cm_x, cm_y, cm_z);
+											dobj.rotationAngle = dynamicObject->rotationAngle;
+											dobj.rotationAxis = dynamicObject->rotationAxis;
+
+											//Position
+											btTransform pt(btQuaternion(getBtFromLVector3(dobj.rotationAxis),
+															dynamicObject->rotationAngle),
+															getBtFromLVector3(dynamicObject->position));
+											btVector3 rotatedPosition = pt * cmVector;
+											btVector3 initTranslation(rotatedPosition.getX(), rotatedPosition.getY(), rotatedPosition.getZ());
+
+											//initial position
+											dobj.position = getLFromBtVector3(initTranslation);
+
+
+											//New shattered object velocity
+											//TODO: use hashing without looping on the objects
+											bool hasSetVelocity = false;
+											//if (idFrame > 0)
+											//{
+												//Frame prevFrame = LarmorPhysx::loadFrame(idFrame - 1);
+												Frame prevFrame = stepFrame; //Previous Frame
+												DynamicObjectVector::iterator dynamicObjectVectorIterPrev;
+												for(dynamicObjectVectorIterPrev = prevFrame.dynamicObjects.begin();
+														dynamicObjectVectorIterPrev != prevFrame.dynamicObjects.end();
+														++dynamicObjectVectorIterPrev)
 												{
-													so.simplifyMesh = meshSimplification(so.meshData.first.first, 500);
+													DynamicObject dynamicObjectPrev = *dynamicObjectVectorIterPrev;
+													if (dynamicObjectPrev.idObj == dynamicObject->idObj)
+													{
+														dobj.linearVelocity = dynamicObjectPrev.linearVelocity;
+														dobj.angularVelocity = dynamicObjectPrev.angularVelocity;
+														hasSetVelocity = true;
+														break;
+													}
 												}
+											//}
 
-												//Prevent static object is mass and inertia is 0
-												if (so.volume < 0.1)
-												{
-													so.volume = 0.1;
-													so.mass = so.volume * so.density;
-												}
-												if (so.inertia.x < 0.0001)
-													so.inertia.x = 0.001;
-												if (so.inertia.y < 0.0001)
-													so.inertia.y = 0.001;
-												if (so.inertia.z < 0.0001)
-													so.inertia.z = 0.001;
+											if (!hasSetVelocity)
+											{
+												//ORIGINAL CODE
 
-												std::cout << "---> Object Mass:" << so.mass
-														<< " Inertia: (" << so.inertia.x << ", " << so.inertia.y << ", " << so.inertia.z << ")" << std::endl;
-
-												//Save staticObject
-												LarmorPhysx::saveStaticObject(so);
-
-												//Create DynamicObject
-												DynamicObject dobj;
-												dobj.idObj = stepFrame.lastCreatedIdObj;
-												idGroupCounter++;
-												dobj.idGroup = idGroupCounter; //Each pieces has now a different groupId so m_combinedRestitution = 1.0
-												//dobj.idGroup = dynamicObject->idGroup;
-												//Calcolate position
-												Point originObj = so.meshData.second;
-												double cm_x = CGAL::to_double(originObj.x());
-												double cm_y = CGAL::to_double(originObj.y());
-												double cm_z = CGAL::to_double(originObj.z());
-												btVector3 cmVector(cm_x, cm_y, cm_z);
-												dobj.rotationAngle = dynamicObject->rotationAngle;
-												dobj.rotationAxis = dynamicObject->rotationAxis;
-
-												//Position
-												btTransform pt(btQuaternion(getBtFromLVector3(dobj.rotationAxis),
-																dynamicObject->rotationAngle),
-																getBtFromLVector3(dynamicObject->position));
-												btVector3 rotatedPosition = pt * cmVector;
-												btVector3 initTranslation(rotatedPosition.getX(), rotatedPosition.getY(), rotatedPosition.getZ());
-
-												//Add a translation on Y axis of 12.0
-												dobj.position = getLFromBtVector3(initTranslation);
-
-												//TODO: study the law for result linearVelocity and angularVelocity
+												//TODO: study the law for result linearVelocity and angularVelocity, it works for now
 												dobj.linearVelocity = dynamicObject->linearVelocity;
 												dobj.angularVelocity = dynamicObject->angularVelocity;
 												//dobj.angularVelocity = LVector3(0.0, 0.0, 0.0);
 
-												dobj.isDynamic = true;
-												dobj.statusInWorld = 0;
-
-												//Add dobj to dynamicObjectsInWorld
-												DynamicObject* ptrNewDynamicObject = new DynamicObject(dobj);
-												dynamicObjectsInWorld.push_back(ptrNewDynamicObject);
-												newObjectIntoDynamicObjectsInWorld = true;
-
-												//Load here the dynamicObject->staticObject if use_memory_for_meshes
-												if (LarmorPhysx::ConfigManager::use_memory_for_meshes)
-												{
-													//load staticObject from file
-													ptrNewDynamicObject->staticObject = so;
-												}
-
-
 											}
 
-											//Remove the old object from the scene changing the statusInWorld status
-											std::cout << " Remove DynamicObject idObj: " << dynamicObject->idObj << std::endl;
-											dynamicObject->statusInWorld = 2;
-											//Bullet Physic remove from the world
-											m_dynamicsWorld->removeRigidBody(body);
 
-											//TODO: remove bullet btGImpactMeshShape and bTriangleMesh created with new
-											//delete motionState;
-											//m_dynamicsWorld->removeCollisionObject(collisionObj);
-											//delete collisionObj;
+											dobj.isDynamic = true;
+											dobj.statusInWorld = 0;
+
+											//Add dobj to dynamicObjectsInWorld
+											DynamicObject* ptrNewDynamicObject = new DynamicObject(dobj);
+											dynamicObjectsInWorld.push_back(ptrNewDynamicObject);
+											newObjectIntoDynamicObjectsInWorld = true;
+
+											//Load here the dynamicObject->staticObject if use_memory_for_meshes
+											if (LarmorPhysx::ConfigManager::use_memory_for_meshes)
+											{
+												//load staticObject from file
+												ptrNewDynamicObject->staticObject = so;
+											}
 
 										}
-										else
-										{
-											std::cout << " ******* NOT SHATTERED numShatterPieces < 2 " << std::endl;
-										}
+
+										//Remove the old object from the scene changing the statusInWorld status
+										std::cout << " Remove DynamicObject idObj: " << dynamicObject->idObj << std::endl;
+										dynamicObject->statusInWorld = 2;
+										//Bullet Physic remove from the world
+										m_dynamicsWorld->removeRigidBody(body);
+
+										//TODO: remove bullet btGImpactMeshShape and bTriangleMesh created with new
+										//delete motionState;
+										//m_dynamicsWorld->removeCollisionObject(collisionObj);
+										//delete collisionObj;
+
 									}
 								}
 							}
-
 						}
 					} //For numObjects
 
@@ -530,6 +671,7 @@ namespace LarmorPhysx
 			}
 
 
+			//Convex and Non-Convex object creation
 			//TODO: use ConfigManager::use_simplified_meshes_for_bullet
 			void PhysicsCore::addDynamicObjectsToWorld()
 			{
@@ -539,7 +681,7 @@ namespace LarmorPhysx
 						dynamicObjectPtrVectorIter != dynamicObjectsInWorld.end();
 						++dynamicObjectPtrVectorIter)
 				{
-					//std::cout << "DynamicObject building in the world..." << std::endl;
+					//std::cout << "addDynamicObjectsToWorld DynamicObject adding in the world..." << std::endl;
 
 					if (dynamicObjectPtrVectorIter->statusInWorld == 0)
 					{
@@ -571,46 +713,90 @@ namespace LarmorPhysx
 							objMass = 0.0;
 						}
 
-						btTriangleMesh *triMeshTriangle = new  btTriangleMesh();
-
-						std::list<Triangle>::iterator triangleIter;
-						for(triangleIter = dynamicObjectPtrVectorIter->staticObject.meshData.first.first.begin();
-								triangleIter != dynamicObjectPtrVectorIter->staticObject.meshData.first.first.end();
-								++triangleIter)
-						{
-							Triangle t = *triangleIter;
-							btVector3 tbtv[3];
-
-							for (int i = 0; i < 3; ++i)
-							{
-								Point tv = t.vertex(i);
-								double tx = CGAL::to_double(tv.x());
-								double ty = CGAL::to_double(tv.y());
-								double tz = CGAL::to_double(tv.z());
-								tbtv[i] = btVector3(tx, ty, tz);
-							}
-
-							triMeshTriangle->addTriangle(tbtv[0], tbtv[1], tbtv[2]);
-						}
-
-						btGImpactMeshShape * trimesh = new btGImpactMeshShape(triMeshTriangle);
-						trimesh->setMargin(0.0); //usare anche con  0.07 0.02 0.00f
-						trimesh->updateBound();
-
+						//build the btDefaultMotionState
 						btTransform startTransform;
 						startTransform.setIdentity();
 						startTransform.setOrigin(getBtFromLVector3(dynamicObjectPtrVectorIter->position));
 						startTransform.setRotation(btQuaternion(getBtFromLVector3(dynamicObjectPtrVectorIter->rotationAxis), dynamicObjectPtrVectorIter->rotationAngle));
 						btDefaultMotionState* objMotionState = new btDefaultMotionState(startTransform);
 
-						btRigidBody::btRigidBodyConstructionInfo cInfo(objMass, objMotionState, trimesh, objInertia);
-						// READ: http://bulletphysics.org/mediawiki-1.5.8/index.php/BtContactSolverInfo#Resting_contact_restitution_threshold
-						//cInfo.m_restitution = 1.0; //Non per mattoni uno sull'altro!
-						//cInfo.m_friction = 0.0f;
-						//cInfo.m_linearDamping = 0.2;
-						//cInfo.m_angularDamping = 0.2;
+						btRigidBody* body;
 
-						btRigidBody* body = new btRigidBody(cInfo);
+						//Different ways to create the dynamic object for convex and non-convex mesh
+						if (dynamicObjectPtrVectorIter->staticObject.isConvex)
+						{
+							// for convex mesh
+							btConvexHullShape *triMeshTriangle = new  btConvexHullShape();
+
+							std::list<Triangle>::iterator triangleIter;
+							for(triangleIter = dynamicObjectPtrVectorIter->staticObject.meshData.first.first.begin();
+									triangleIter != dynamicObjectPtrVectorIter->staticObject.meshData.first.first.end();
+									++triangleIter)
+							{
+								Triangle t = *triangleIter;
+								btVector3 tbtv[3];
+
+								for (int i = 0; i < 3; ++i)
+								{
+									Point tv = t.vertex(i);
+									double tx = CGAL::to_double(tv.x());
+									double ty = CGAL::to_double(tv.y());
+									double tz = CGAL::to_double(tv.z());
+									tbtv[i] = btVector3(tx, ty, tz);
+								}
+
+								triMeshTriangle->addPoint(tbtv[0]);
+								triMeshTriangle->addPoint(tbtv[1]);
+								triMeshTriangle->addPoint(tbtv[2]);
+							}
+
+							triMeshTriangle->setMargin(0.0001); //0.001
+							triMeshTriangle->initializePolyhedralFeatures();
+
+							btRigidBody::btRigidBodyConstructionInfo cInfo(objMass, objMotionState, triMeshTriangle, objInertia);
+							cInfo.m_friction = 0.7f;
+
+							body = new btRigidBody(cInfo);
+						}
+						else
+						{
+							// for non-convex mesh
+							btTriangleMesh *triMeshTriangle = new  btTriangleMesh();
+
+							std::list<Triangle>::iterator triangleIter;
+							for(triangleIter = dynamicObjectPtrVectorIter->staticObject.meshData.first.first.begin();
+									triangleIter != dynamicObjectPtrVectorIter->staticObject.meshData.first.first.end();
+									++triangleIter)
+							{
+								Triangle t = *triangleIter;
+								btVector3 tbtv[3];
+
+								for (int i = 0; i < 3; ++i)
+								{
+									Point tv = t.vertex(i);
+									double tx = CGAL::to_double(tv.x());
+									double ty = CGAL::to_double(tv.y());
+									double tz = CGAL::to_double(tv.z());
+									tbtv[i] = btVector3(tx, ty, tz);
+								}
+
+								triMeshTriangle->addTriangle(tbtv[0], tbtv[1], tbtv[2]);
+							}
+
+							btGImpactMeshShape * trimesh = new btGImpactMeshShape(triMeshTriangle);
+							trimesh->setMargin(0.0); //usare anche con  0.07 0.02 0.00f
+							trimesh->updateBound();
+
+							btRigidBody::btRigidBodyConstructionInfo cInfo(objMass, objMotionState, trimesh, objInertia);
+							// READ: http://bulletphysics.org/mediawiki-1.5.8/index.php/BtContactSolverInfo#Resting_contact_restitution_threshold
+							//cInfo.m_restitution = 1.0; //Non per mattoni uno sull'altro!
+							//cInfo.m_friction = 0.0f;
+							//cInfo.m_linearDamping = 0.2;
+							//cInfo.m_angularDamping = 0.2;
+
+							body = new btRigidBody(cInfo);
+						}
+
 						body->setContactProcessingThreshold(0.0);
 						//TODO: test senza usare DISABLE_DEACTIVATION: come si comportano gli oggetti a riposo, continuano a saltare?
 						if (LarmorPhysx::ConfigManager::disable_deactivation)
@@ -641,6 +827,7 @@ namespace LarmorPhysx
 					}
 				}
 			}
+
 
 
 			void PhysicsCore::copyDynamicObjectsInWorldIntoFrame()
@@ -718,8 +905,11 @@ namespace LarmorPhysx
 				{
 					if (idGroup0 != idGroup1)
 					{
-						cp.m_combinedRestitution = 0.8; //0.8
-						cp.m_combinedFriction = 1.0;
+						//Used for non-convex object: these lines was uncommented in non-convex version
+						// this was in order to permit to build stacks of non-convex objects (bricks on wall)
+						// Use instead convex object to build stacks
+						//cp.m_combinedRestitution = 1.0; //0.8
+						//cp.m_combinedFriction = 1.0;
 					}
 				}
 				//cp.m_combinedFriction = 0.0;
@@ -790,7 +980,9 @@ namespace LarmorPhysx
 						int minIndex = -1;
 						for (int contactIndex = 0; contactIndex < numContacts; contactIndex++)
 						{
-							if (minDistance >contactManifold->getContactPoint(contactIndex).getDistance())
+							//looking for the collision with less distance and impulse > 0
+							if ( (minDistance >contactManifold->getContactPoint(contactIndex).getDistance()) &&
+									(contactManifold->getContactPoint(contactIndex).m_appliedImpulse > 0.0) )
 							{
 								minDistance = contactManifold->getContactPoint(contactIndex).getDistance();
 								minIndex = contactIndex;

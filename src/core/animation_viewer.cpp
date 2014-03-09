@@ -29,8 +29,10 @@
 
 #include "animation_viewer.h"
 
-#define DEGREES_PER_PIXEL_LPV 0.6f
-#define UNITS_PER_PIXEL_LPV 0.5f
+#define DEGREES_PER_PIXEL_ROT 0.3f
+#define DEGREES_PER_PIXEL_TLT 0.3f
+#define UNITS_PER_PIXEL_ZOM 0.5f
+
 #define CONV_PI  3.14159265358979323846f
 
 //#define USE_TWO_MESH_COLORS
@@ -41,8 +43,8 @@ namespace LarmorPhysxViewer
 	unsigned int idFrame = 0;
 	unsigned int idScreenFrame = 0;
 
-	static float focusx, focusy, focusz; // the point the eye is looking at
-	float hRotation, vRotation, eyeDist;
+	// Camera and lookat position
+	Camera eyeCamera;
 
 	// Timing Variables
 	int g_nFPS = 0;
@@ -63,7 +65,7 @@ namespace LarmorPhysxViewer
 	bool colorViewActive = false;
 	bool specularActive = false;
 	bool doAnim = false;
-	bool doAutoRotation = false;
+	bool doAnimCamera = false;
 	bool doSaveAnimScreenshot = false;
 	bool viewCollision = false;
 
@@ -86,6 +88,9 @@ namespace LarmorPhysxViewer
 	std::vector<DynamicObjectVector> dynamicObjectVectorFrames;
 	std::vector<CollisionPointVector> collisionPointVectorFrames;
 
+	Camera animCamera;
+	bool isAnimCameraValid = false;
+
 	void loadAnimation()
 	{
 		idFrame = LarmorPhysx::ConfigManager::start_load_frame;
@@ -100,7 +105,7 @@ namespace LarmorPhysxViewer
 
 			dynamicObjectVectorFrames.push_back(stepFrame.dynamicObjects);
 
-			std::cout << "  Total collisionPoints size: " << stepFrame.collisionPoints.size() << std::endl;
+			//std::cout << "  Total collisionPoints size: " << stepFrame.collisionPoints.size() << std::endl;
 			collisionPointVectorFrames.push_back(stepFrame.collisionPoints);
 
 			DynamicObjectVector::iterator dynamicObjectVectorIter;
@@ -169,7 +174,7 @@ namespace LarmorPhysxViewer
 
 
 	//C:\LARMOR\video\FFF\ffmpeg\ffmpeg.exe -r 30 -i C:\LARMOR\DEVELOP\WORKSPACE_CDT\RevanoVX\Release\scenes_output_wall3\images\frameimg_%05d.bmp -vcodec libx264 -vpre ./libx264-hq.ffpreset -b 10M -bt 10M test_wall1.mp4
-	//C:\LARMOR\video\FFF\ffmpeg\ffmpeg.exe -r 30 -i C:\LARMOR\DEVELOP\WORKSPACE_CDT\RevanoVX\Release\scenes_output_wall3\images\frameimg_%05d.bmp -vcodec libx264 -vpre ./libx264-hq.ffpreset -b 20M -bt 20M test_wall2.mp4
+	//C:\LARMOR\video\FFF\ffmpeg\ffmpeg.exe -r 30 -i C:\LARMOR\DEVELOP\WORKSPACE_CDT\RevanoVX\Release\scenes_output_wall3\images\frameimg_%05d.bmp -vcodec libx264 -vpre C:\LARMOR\video\FFF\ffmpeg\ffpresets\libx264-hq.ffpreset -b 20M -bt 20M test_video1.mp4
 	void save_bmp_screenshot()
 	{
 		unsigned char *pixels = (unsigned char*)malloc(glutGet(GLUT_WINDOW_WIDTH)*glutGet(GLUT_WINDOW_HEIGHT)*3);  // Assuming GL_RGB
@@ -211,6 +216,7 @@ namespace LarmorPhysxViewer
 		    fwrite(bmppad,1,(4-(w*3)%4)%4,ppmFile);
 		}
 		fclose(ppmFile);
+		std::cout << "save_bmp_screenshot in: " << fileName.str() <<std::endl;
 
 		free(pixels);
 
@@ -233,16 +239,29 @@ namespace LarmorPhysxViewer
 		g_nFrames++;
 
 
+		if (!isAnimCameraValid)
+		{
+			animCamera = loadCamera(idFrame);
+			isAnimCameraValid = true;
+		}
+
+		if (doAnimCamera)
+		{
+			 eyeCamera.eyePosition = animCamera.eyePosition;
+			 eyeCamera.lookAt = animCamera.lookAt;
+		}
+
+
 		// Clear frame buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Set up viewing transformation, looking down -Z axis
 		glLoadIdentity();
 
-		gluLookAt(cos(hRotation*CONV_PI/180.0)*sin(vRotation*CONV_PI/180.0)*eyeDist,
-				cos(vRotation*CONV_PI/180.0)*eyeDist,
-				sin(hRotation*CONV_PI/180.0)*sin(vRotation*CONV_PI/180.0)*eyeDist,
-				focusx, focusy, focusz, 0, 1, 0);
+		// set camera and lookat position
+		gluLookAt(eyeCamera.eyePosition.x, eyeCamera.eyePosition.y, eyeCamera.eyePosition.z,
+				eyeCamera.lookAt.x, eyeCamera.lookAt.y, eyeCamera.lookAt.z,
+				0, 1, 0);
 
 		// Set up the stationary light
 		//glLightfv(GL_LIGHT0, GL_POSITION, g_lightPos);
@@ -279,10 +298,19 @@ namespace LarmorPhysxViewer
 				stringText2 << "FPS: " << g_nFPS;
 				print_bitmap_string(GLUT_BITMAP_HELVETICA_12, stringText2.str().c_str());
 
-				//www.larmor.com
-				glRasterPos2i(glutGet(GLUT_WINDOW_WIDTH) - 150, 20);
-				print_bitmap_string(GLUT_BITMAP_HELVETICA_18, "www.larmor.com");
+				//Dump camera coordinate
+				glRasterPos2i(10, glutGet(GLUT_WINDOW_HEIGHT) - 60);
+				std::stringstream stringTextCamCoo;
+				stringTextCamCoo << "Camera at: " << eyeCamera.eyePosition.x;
+				stringTextCamCoo << ", " << eyeCamera.eyePosition.y;
+				stringTextCamCoo << ", " << eyeCamera.eyePosition.z;
+				stringTextCamCoo << "  KF:" << (animCamera.keyframe ? "Y" : "-");
+				print_bitmap_string(GLUT_BITMAP_HELVETICA_12, stringTextCamCoo.str().c_str());
+
 			}
+			//www.larmor.com
+			glRasterPos2i(glutGet(GLUT_WINDOW_WIDTH) - 150, 20);
+			print_bitmap_string(GLUT_BITMAP_HELVETICA_18, "www.larmor.com");
 			glMatrixMode(GL_MODELVIEW);
 			glPopMatrix();
 			glMatrixMode(GL_PROJECTION);
@@ -441,6 +469,39 @@ namespace LarmorPhysxViewer
 		glPopMatrix();
 
 
+		//visualize animation camera position
+		glPushMatrix(); //Save last matrix
+		float xac = animCamera.eyePosition.x - animCamera.lookAt.x; //X
+		float yac = animCamera.eyePosition.y - animCamera.lookAt.y; //Z
+		float zac = animCamera.eyePosition.z - animCamera.lookAt.z; //Y
+		float rac = sqrt(xac*xac + yac*yac + zac*zac);
+		float tac = acos(yac / rac) * 180.0 / CONV_PI - 90;
+		float pac = - atan2(zac, xac) * 180.0 / CONV_PI + 90;
+		glTranslatef(animCamera.eyePosition.x, animCamera.eyePosition.y, animCamera.eyePosition.z); //Position
+		glRotatef(pac, 0, 1, 0); //Rotation
+		glRotatef(tac, 1, 0, 0); //Tilt
+		// Wire cone
+		glutWireCone(0.5, 2.0, 4, 4);
+		// Vector line
+		glLineWidth(2.5);
+		glBegin(GL_LINES);
+			glVertex3f(0.0, 0.0, 2.0);
+			glVertex3f(0.0, 0.0, -1.0);
+		glEnd();
+		glLineWidth(1.0);
+		glPopMatrix(); //Recover last saved matrix
+
+
+		if (!doSaveAnimScreenshot)
+		{
+			// visualize lookAt position
+			glPushMatrix();
+				glTranslatef(eyeCamera.lookAt.x, eyeCamera.lookAt.y, eyeCamera.lookAt.z);
+				glutSolidSphere(0.2, 8, 8);
+			glPopMatrix();
+		}
+
+
 		//Render collision points
 		if (viewCollision)
 		{
@@ -533,22 +594,14 @@ namespace LarmorPhysxViewer
 			if (doAnim)
 			{
 				//idFrame++;
-				idFrame += 15;
+				idFrame +=  LarmorPhysx::ConfigManager::frames_per_step_animationviewer;
 				if (idFrame > LarmorPhysx::ConfigManager::total_anim_steps)
 				{
 					idFrame = 0;
 					std::cout << "Restart Animation from frame 0" << std::endl;
 				}
 				//std::cout << "animate idFrame: " << idFrame << std::endl;
-			}
-
-			if (doAutoRotation)
-			{
-				hRotation += 0.7;
-			}
-
-			if (doAnim || doAutoRotation)
-			{
+				isAnimCameraValid = false;
 				glutPostRedisplay();
 			}
 
@@ -570,11 +623,9 @@ namespace LarmorPhysxViewer
 		MouseState.leftButton = MouseState.rightButton = MouseState.middleButton = false;
 		MouseState.x = MouseState.y = 0;
 
-		// init focus location location and rotation and distance
-		focusx = focusy = focusz = 0.0f;
-		hRotation = 0;
-		vRotation = 60;
-		eyeDist = 50;
+		//init eye camera
+		eyeCamera.eyePosition = LVector3(40.0, 40.0, 0.0);
+		eyeCamera.lookAt = LVector3(0.0, 0.0, 0.0);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -681,24 +732,93 @@ namespace LarmorPhysxViewer
 		// when we need to rotate (only the left button is down)
 		if(MouseState.leftButton && !MouseState.rightButton && !MouseState.middleButton)
 		{
-			// rotate by the delta
-			hRotation -= xDelta * DEGREES_PER_PIXEL_LPV;
-			vRotation -= yDelta * DEGREES_PER_PIXEL_LPV;
+			/*
+			// rotate around lookat horizontal axes
+			float rotZ = -yDelta * DEGREES_PER_PIXEL_LPV;
+			float xc = eyeCamera.eyePosition.x;
+			float yc = eyeCamera.eyePosition.y;
+			float zc = eyeCamera.eyePosition.z;
+			float xct = xc * cos(rotZ*CONV_PI/180.0) - yc * sin(rotZ*CONV_PI/180.0);
+			float yct = xc * sin(rotZ*CONV_PI/180.0) + yc * cos(rotZ*CONV_PI/180.0);
+			float zct = zc;
+			eyeCamera.eyePosition.x = xct;
+			eyeCamera.eyePosition.y = yct;
+			eyeCamera.eyePosition.z = zct;
+			*/
+			/*
+			// rotate around lookat vertical axes
+			float rotY = xDelta * DEGREES_PER_PIXEL_LPV;
+			xc = eyeCamera.eyePosition.x;
+			yc = eyeCamera.eyePosition.y;
+			zc = eyeCamera.eyePosition.z;
+			xct = zc * sin(rotY*CONV_PI/180.0) + xc * cos(rotY*CONV_PI/180.0);
+			yct = yc;
+			zct = zc * cos(rotY*CONV_PI/180.0) - xc * sin(rotY*CONV_PI/180.0);
+			eyeCamera.eyePosition.x = xct;
+			eyeCamera.eyePosition.y = yct;
+			eyeCamera.eyePosition.z = zct;
+			*/
+
+			float xac = eyeCamera.eyePosition.x - eyeCamera.lookAt.x; //X
+			float yac = eyeCamera.eyePosition.y - eyeCamera.lookAt.y; //Z
+			float zac = eyeCamera.eyePosition.z - eyeCamera.lookAt.z; //Y
+			float rac = sqrt(xac*xac + yac*yac + zac*zac);
+			float tac = acos(yac / rac); //Tilt
+			float pac = atan2(zac, xac); //Rotation
+			float rotY = -xDelta * DEGREES_PER_PIXEL_ROT * CONV_PI/180.0;
+			float rotZ = yDelta * DEGREES_PER_PIXEL_TLT * CONV_PI/180.0;
+			rotY += pac;
+			rotZ += tac;
+			if (rotZ < 0 )
+				rotZ = 0.001;
+			if (rotZ > CONV_PI )
+				rotZ = CONV_PI - 0.001;
+			eyeCamera.eyePosition.x = rac * sin(rotZ) * cos(rotY) + eyeCamera.lookAt.x;
+			eyeCamera.eyePosition.y = rac * cos(rotZ) + eyeCamera.lookAt.y;
+			eyeCamera.eyePosition.z = rac * sin(rotZ) * sin(rotY) + eyeCamera.lookAt.z;
+
 		}
 
 		// zoom
 		else if(!MouseState.leftButton && MouseState.rightButton && !MouseState.middleButton)
 		{
-			// move distance
-			eyeDist -= yDelta * UNITS_PER_PIXEL_LPV;
+			// zoom
+			float tranR = yDelta * 0.01;
+			// save the eye position coordinates
+			float xt = eyeCamera.eyePosition.x;
+			float yt = eyeCamera.eyePosition.y;
+			float zt = eyeCamera.eyePosition.z;
+			// move the eyePosition
+			eyeCamera.eyePosition.x += (eyeCamera.eyePosition.x - eyeCamera.lookAt.x) * tranR;
+			eyeCamera.eyePosition.y += (eyeCamera.eyePosition.y - eyeCamera.lookAt.y) * tranR;
+			eyeCamera.eyePosition.z += (eyeCamera.eyePosition.z - eyeCamera.lookAt.z) * tranR;
+			// move the lookAt
+			eyeCamera.lookAt.x += (xt - eyeCamera.lookAt.x) * tranR;
+			eyeCamera.lookAt.y += (yt - eyeCamera.lookAt.y) * tranR;
+			eyeCamera.lookAt.z += (zt - eyeCamera.lookAt.z) * tranR;
 		}
 
-		// if we need to move translate (left and right buttons are down
-		if(!MouseState.leftButton && !MouseState.rightButton && MouseState.middleButton)
+		// if we need to move the lookat position (left and right buttons are down)
+		//if(!MouseState.leftButton && !MouseState.rightButton && MouseState.middleButton)
+		if(MouseState.leftButton && MouseState.rightButton && !MouseState.middleButton)
 		{
-			// move the focus
-			focusx -= yDelta * UNITS_PER_PIXEL_LPV;
-			focusz -= -xDelta * UNITS_PER_PIXEL_LPV;
+			float xac = eyeCamera.lookAt.x - eyeCamera.eyePosition.x; //X
+			float yac = eyeCamera.lookAt.y - eyeCamera.eyePosition.y; //Z
+			float zac = eyeCamera.lookAt.z - eyeCamera.eyePosition.z; //Y
+			float rac = sqrt(xac*xac + yac*yac + zac*zac);
+			float tac = acos(yac / rac); //Tilt
+			float pac = atan2(zac, xac); //Rotation
+			float rotY = -xDelta * DEGREES_PER_PIXEL_ROT * CONV_PI/180.0;
+			float rotZ = yDelta * DEGREES_PER_PIXEL_TLT * CONV_PI/180.0;
+			rotY += pac;
+			rotZ += tac;
+			if (rotZ < 0 )
+				rotZ = 0.001;
+			if (rotZ > CONV_PI )
+				rotZ = CONV_PI - 0.001;
+			eyeCamera.lookAt.x = rac * sin(rotZ) * cos(rotY) + eyeCamera.eyePosition.x;
+			eyeCamera.lookAt.y = rac * cos(rotZ) + eyeCamera.eyePosition.y;
+			eyeCamera.lookAt.z = rac * sin(rotZ) * sin(rotY) + eyeCamera.eyePosition.z;
 		}
 
 		glutPostRedisplay();
@@ -711,6 +831,87 @@ namespace LarmorPhysxViewer
 		if (c == 113) {
 			printf("Quit!!\n");
 			exit(0);
+		}
+
+		//save camera position
+		if(c == char('c')) {
+			printf("Camera From %f, %f, %f look at %f, %f, %f\n",
+					eyeCamera.eyePosition.x, eyeCamera.eyePosition.y, eyeCamera.eyePosition.z,
+					eyeCamera.lookAt.x, eyeCamera.lookAt.y, eyeCamera.lookAt.z);
+
+			//Create the Camera object and save
+			Camera camera;
+			camera.idFrame = idFrame;
+			camera.eyePosition = LVector3(eyeCamera.eyePosition.x, eyeCamera.eyePosition.y, eyeCamera.eyePosition.z);
+			camera.lookAt = LVector3(eyeCamera.lookAt.x, eyeCamera.lookAt.y, eyeCamera.lookAt.z);
+			camera.keyframe = true;
+			//Save camera
+			saveCamera(camera);
+
+			//Invalid camera so it will be in the new position
+			isAnimCameraValid = false;
+			glutPostRedisplay();
+		}
+
+		//delete camera position
+		if(c == char('r')) {
+			cout << "Delete camera idFrame:" << idFrame << endl;
+
+			//actually simple override the camera file with a camera object with keyframe false
+			Camera camera;
+			camera.idFrame = idFrame;
+			camera.eyePosition = LVector3(0.0, 0.0, 0.0);
+			camera.lookAt = LVector3(0.0, 0.0, 0.0);
+			camera.keyframe = false;
+			//Save camera
+			saveCamera(camera);
+
+			//Invalid camera so it will be in the new position
+			isAnimCameraValid = false;
+			glutPostRedisplay();
+		}
+
+		//computeSplineCameraPath
+		if(c == char('p')) {
+			cout << "Start compute Camera path...." << endl;
+
+			computeCubicSplineCameraPath();
+
+			cout << "End compute Camera path" << endl;
+
+			//Invalid camera so it will be in the new position
+			isAnimCameraValid = false;
+			glutPostRedisplay();
+		}
+
+		if(c == char('s')) {
+			eyeCamera.lookAt.x += 0.3;
+			glutPostRedisplay();
+		}
+
+		if(c == char('a')) {
+			eyeCamera.lookAt.x -= 0.3;
+			glutPostRedisplay();
+		}
+
+		if(c == char('w')) {
+			eyeCamera.lookAt.y += 0.3;
+			glutPostRedisplay();
+		}
+
+		if(c == char('z')) {
+			eyeCamera.lookAt.y -= 0.3;
+			glutPostRedisplay();
+		}
+
+		if(c == char('x')) {
+			eyeCamera.lookAt.z += 0.3;
+			glutPostRedisplay();
+		}
+
+		if(c == char('c')) {
+			eyeCamera.lookAt.z -= 0.3;
+			glutPostRedisplay();
 		}
 	}
 
@@ -760,7 +961,8 @@ namespace LarmorPhysxViewer
 					doAnim = !doAnim;
 					break;
 			case GLUT_KEY_F12 :
-					doAutoRotation = !doAutoRotation;
+					doAnimCamera = !doAnimCamera;
+					glutPostRedisplay();
 					break;
 
 			case GLUT_KEY_LEFT :
@@ -773,6 +975,7 @@ namespace LarmorPhysxViewer
 					{
 						idFrame--;
 					}
+					isAnimCameraValid = false;
 					glutPostRedisplay();
 					break;
 			case GLUT_KEY_RIGHT :
@@ -782,6 +985,7 @@ namespace LarmorPhysxViewer
 						idFrame = 0;
 						std::cout << "Restart Animation from frame 0" << std::endl;
 					}
+					isAnimCameraValid = false;
 					glutPostRedisplay();
 					break;
 		}

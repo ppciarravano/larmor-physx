@@ -115,6 +115,7 @@ std::list<TranslatedMeshData> loadTranslatedMeshDataList(const char * filename, 
 double minimumEdgeLength(TrianglesList &triangles); //use to find a valid facetDistance (facetDistance can be minimum * 10);
 double minimumBoundingDimension(TrianglesList &triangles);
 std::vector<double> internalVolumeAndInertiaMesh(TrianglesList &triangles, double facetDistance); //Use facetDistance = 0.01
+std::vector<double> internalVolumeAndInertiaMeshConvex(TrianglesList &triangles, Point meshCenter);
 
 //Functions definited in MeshMassProperties.cpp: doesn't work fine for holed meshes (and also for convex mesh too)
 void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, Point &cmReturn, Vector &inertiaReturn);

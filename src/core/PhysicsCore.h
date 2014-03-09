@@ -112,6 +112,8 @@ namespace LarmorPhysx
 			void addDynamicObjectsToWorld();
 			void copyDynamicObjectsInWorldIntoFrame();
 
+			static std::list<TranslatedMeshData> shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax);
+
 	};
 
 	inline btScalar	calculateCombinedFriction(float friction0, float friction1);

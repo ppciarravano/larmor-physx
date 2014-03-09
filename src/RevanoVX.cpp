@@ -53,7 +53,7 @@
 using namespace LarmorPhysx;
 
 int main(int argc, char** argv) {
-	std::cout << "Revano VX - LarmorPhysx\nAuthor: Pier Paolo Ciarravano\nhttp://www.larmor.com" << std::endl;
+	std::cout << "Revano VX - LarmorPhysx Vers. 1.1beta Feb. 2014\nAuthor: Pier Paolo Ciarravano\nhttp://www.larmor.com" << std::endl;
 
 	std::cout << "Start at: " << currentDateTime() << std::endl;
 	CGAL::Timer timer;
@@ -165,6 +165,48 @@ int main(int argc, char** argv) {
 
 		std::cout << "createFirstFrame_Scene12:" << std::endl;
 		createFirstFrame_Scene12();
+	}
+	if (ConfigManager::action == "createscene13")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene13:" << std::endl;
+		createFirstFrame_Scene13();
+	}
+	if (ConfigManager::action == "createscene14")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene14:" << std::endl;
+		createFirstFrame_Scene14();
+	}
+	if (ConfigManager::action == "createscene15")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene15:" << std::endl;
+		createFirstFrame_Scene15();
+	}
+	if (ConfigManager::action == "createscene16")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene16:" << std::endl;
+		createFirstFrame_Scene16();
+	}
+	if (ConfigManager::action == "createscene17")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene17:" << std::endl;
+		createFirstFrame_Scene17();
+	}
+	if (ConfigManager::action == "createscene18")
+	{
+		createNotExistsDir(ConfigManager::scene_output_directory.c_str());
+
+		std::cout << "createFirstFrame_Scene18:" << std::endl;
+		createFirstFrame_Scene18();
 	}
 	if (ConfigManager::action == "explodescene")
 	{

@@ -28,31 +28,48 @@
  ****************************************************************************/
 
 #include "core_classes.h"
+#include "CubicSpline.h"
 
 #define SERIAL_EXTENSION_FILENAME ".lsr"
 #define STATIC_OBJECT_FILE_NAME "lphsx_so_"
 #define FRAME_FILE_NAME "lphsx_fr_"
+#define CAMERA_FILE_NAME "lphsx_cam_"
 
 namespace LarmorPhysx
 {
 
-
 	void StaticObject::calculateVolumeMassInertia()
 	{
-		double minBBDimension = minimumBoundingDimension(meshData.first.first);
 		std::vector<double> volumeInertia;
 
-		//call 3 times internalVolumeAndInertiaMesh using for each time a smallest facetDistance
-		unsigned int numCycle = 0;
-		int multipleValue = 1;
-		do
+		if (isConvex)
 		{
-			std::cout << "StaticObject::calculateVolumeMassInertia: using facetDistance:" << (ConfigManager::facet_distance_coef * multipleValue) << std::endl;
-			volumeInertia = internalVolumeAndInertiaMesh(meshData.first.first, minBBDimension / (ConfigManager::facet_distance_coef * multipleValue));
-			numCycle++;
-			multipleValue *= 10;
-		} while ((volumeInertia.at(0) == 0) && (numCycle < 3));
+			//The object is convex so we can use the tetrahedras build with the mesh triangles and the origin
+			volumeInertia = internalVolumeAndInertiaMeshConvex(meshData.first.first, Point(0.0, 0.0, 0.0));
+		}
+		else
+		{
+			//The object is not-convex so we have to use the volume Tetrahedralization.
+			//  Call 2 times internalVolumeAndInertiaMesh using for each time a smallest facetDistance if the return volume is 0.0
+			double minBBDimension = minimumBoundingDimension(meshData.first.first);
+			unsigned int numCycle = 0;
+			int multipleValue = 1;
+			do
+			{
+				std::cout << "StaticObject::calculateVolumeMassInertia: using facetDistance:" << (ConfigManager::facet_distance_coef * multipleValue) << std::endl;
+				volumeInertia = internalVolumeAndInertiaMesh(meshData.first.first, minBBDimension / (ConfigManager::facet_distance_coef * multipleValue));
+				numCycle++;
+				multipleValue *= 10;
+			} while ((volumeInertia.at(0) == 0.0) && (numCycle < 2));
 
+			//If the volume is still < 0.05 we use the internalVolumeAndInertiaMeshConvex that can approximate the non-convex object volume and inertia
+			if (volumeInertia.at(0) < 0.05)
+			{
+				volumeInertia = internalVolumeAndInertiaMeshConvex(meshData.first.first, Point(0.0, 0.0, 0.0));
+			}
+		}
+//TODO: fix for nan number
+		//Populate the object properties: volume, inertia and mass
 		volume = volumeInertia.at(0);
 		inertia = LVector3(volumeInertia.at(1) * density, volumeInertia.at(2) * density, volumeInertia.at(3) * density);
 		mass = volume * density;
@@ -150,6 +167,106 @@ namespace LarmorPhysx
 		std::stringstream fileName;
 		fileName << ConfigManager::scene_output_directory << FILE_SEPARATOR_CHAR << FRAME_FILE_NAME << "P" << idFrame << SERIAL_EXTENSION_FILENAME;
 		return loadFrame(fileName.str().c_str());
+	}
+
+
+	void saveCamera(Camera &camera, const char * filename)
+	{
+		std::cout << "saveCamera in file: " << filename << std::endl;
+		std::ofstream fileIn(filename, std::ios::out | std::ios::binary);
+		boost::archive::binary_oarchive_pointsmap oa(fileIn);
+		oa & camera;
+		fileIn.close();
+	}
+
+	Camera loadCamera(const char * filename)
+	{
+		std::cout << "loadCamera in file: " << filename << std::endl;
+		Camera camera;
+		std::ifstream fileOut(filename, std::ios::in | std::ios::binary);
+		if (!fileOut.good())
+		{
+			std::cout << "loadCamera not found: " << filename << std::endl;
+			camera.idFrame = 0;
+			camera.eyePosition = LVector3(0.0, 0.0, 0.0);
+			camera.lookAt = LVector3(0.0, 0.0, 0.0);
+			camera.keyframe = false;
+		}
+		else
+		{
+			boost::archive::binary_iarchive ia(fileOut);
+			ia & camera;
+			fileOut.close();
+		}
+
+		return camera;
+	}
+
+	void saveCamera(Camera &camera)
+	{
+		std::stringstream fileName;
+		fileName << ConfigManager::scene_output_directory << FILE_SEPARATOR_CHAR << CAMERA_FILE_NAME << camera.idFrame << SERIAL_EXTENSION_FILENAME;
+		saveCamera(camera, fileName.str().c_str());
+	}
+
+	Camera loadCamera(int idFrame)
+	{
+		std::stringstream fileName;
+		fileName << ConfigManager::scene_output_directory << FILE_SEPARATOR_CHAR << CAMERA_FILE_NAME << idFrame << SERIAL_EXTENSION_FILENAME;
+		return loadCamera(fileName.str().c_str());
+	}
+
+	//compute the camera path using the camera keyframes
+	void computeCubicSplineCameraPath()
+	{
+		//Build the cubic splines
+		CubicSpline splineEyePosition;
+		CubicSpline splineLookAt;
+		vector<int> keyIdFrame;
+		//Add points CubicSpline
+		for (unsigned int fc = 0; fc <= LarmorPhysx::ConfigManager::total_anim_steps; ++fc)
+		{
+			Camera cam = loadCamera(fc);
+			if(cam.keyframe)
+			{
+				cout << "Add point to camera path: frame: " << fc << endl;
+				splineEyePosition.addPoint(cam.eyePosition);
+				splineLookAt.addPoint(cam.lookAt);
+				keyIdFrame.push_back(fc);
+			}
+		}
+		//compute paths
+		splineEyePosition.compute();
+		splineLookAt.compute();
+
+		//draw camera path getting the points from the spline objects
+		for(int kf = 0; kf < keyIdFrame.size()-1; kf++)
+		{
+			int fc0 = keyIdFrame.at(kf);
+			int fc1 = keyIdFrame.at(kf+1);
+			int framesInterval = fc1 - fc0;
+			double frameStep = 1.0L / framesInterval;
+			double cubicPos = 0.0;
+
+			cout << "interpolation from keyframe: " << fc0 << endl;
+			for(int pf = fc0+1; pf < fc1; pf++)
+			{
+				cout << "interpolation frame: " << pf << endl;
+				cubicPos += frameStep;
+				LVector3 eyePosition = splineEyePosition.getPoint(kf, cubicPos);
+				LVector3 lookAt = splineLookAt.getPoint(kf, cubicPos);
+
+				//Create the Camera object and save
+				Camera camera;
+				camera.idFrame = pf;
+				camera.eyePosition = eyePosition;
+				camera.lookAt = lookAt;
+				camera.keyframe = false;
+				//Save camera
+				saveCamera(camera);
+			}
+			cout << "interpolation to keyframe: " << fc1 << endl;
+		}
 	}
 
 
