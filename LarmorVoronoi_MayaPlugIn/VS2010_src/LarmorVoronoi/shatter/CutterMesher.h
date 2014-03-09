@@ -77,7 +77,7 @@ typedef Kernel::Segment_3 Segment;
 typedef Kernel::FT FT;
 typedef Kernel::Ray_3 Ray;
 typedef Kernel::Line_3 Line;
-typedef Kernel::Point_3 Point;
+typedef Kernel::Point_3 PointCGAL;
 typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Direction_3 Direction;
 typedef CGAL::Bbox_3 Bbox;
@@ -184,10 +184,10 @@ typedef std::pair<Point_2,Vertex_handle>  PairPointsExactInexact;
 typedef std::map<Point_2,Vertex_handleDY>   MapInexactPointsDY;
 typedef std::pair<Point_2,Vertex_handleDY>  PairPointsExactInexactDY;
 
-//Mappa che mappa Vertex_handle della mesh CDT 2d nel punto Point in 3d
+//Mappa che mappa Vertex_handle della mesh CDT 2d nel punto PointCGAL in 3d
 //Usato solo in cutMesh_UsingDelaunayMesh
-typedef std::map<Vertex_handle, Point>   MapExactPoints3d;
-typedef std::pair<Vertex_handle, Point>  PairPointsInexactExact3d;
+typedef std::map<Vertex_handle, PointCGAL>   MapExactPoints3d;
+typedef std::pair<Vertex_handle, PointCGAL>  PairPointsInexactExact3d;
 
 
 //-----------------------------------------------------------------------
@@ -232,8 +232,8 @@ void addInTrianglesInfoOutput(std::list<TriangleInfo> &trianglesInfoOutput, MapI
 //};
 
 
-//bool isSignedDistancePositive(Plane plane, Point point);
-inline bool isSignedDistancePositive(Plane &plane, Point point);
+//bool isSignedDistancePositive(Plane plane, PointCGAL point);
+inline bool isSignedDistancePositive(Plane &plane, PointCGAL point);
 
 std::list<TriangleInfo> createNewTriangleInfoList(std::list<Triangle> &meshInput);
 

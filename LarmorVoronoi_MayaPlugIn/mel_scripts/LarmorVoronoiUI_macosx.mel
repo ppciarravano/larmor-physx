@@ -1,0 +1,402 @@
+/*****************************************************************************
+ * Larmor-Physx Version 1.0 2013
+ * Copyright (c) 2013 Pier Paolo Ciarravano - http://www.larmor.com
+ * All rights reserved.
+ *
+ * This file is part of LarmorVoronoi Maya Plugin (http://code.google.com/p/larmor-physx/).
+ *
+ * LarmorVoronoi Maya Plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * LarmorVoronoi Maya Plugin is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LarmorVoronoi Maya Plugin. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Licensees holding a valid commercial license may use this file in
+ * accordance with the commercial license agreement provided with the
+ * software.
+ *
+ * Author: Pier Paolo Ciarravano
+ * $Id$
+ * Version 1.1.1Beta Build 78 (08/03/14)
+ *
+ ****************************************************************************/
+
+global proc larmorVoronoiUI_initialize(string $plugin_info, string $plugin_version)
+{	
+	print("Loading LarmorVoronoi plugin init GUI...\n");
+	print("plugin_info: "+$plugin_info+"\n");
+	print("plugin_version: "+$plugin_version+"\n");
+
+	global string $larmorVoronoiUI_pluginInfo;
+	global string $larmorVoronoiUI_pluginVersion;
+	global string $gMainWindow;
+	
+	$larmorVoronoiUI_pluginInfo = $plugin_info;
+	$larmorVoronoiUI_pluginVersion = $plugin_version;
+	
+	if (`menu -q -exists larmorVoronoiUI_menu`)
+	{
+		menu -e -dai larmorVoronoiUI_menu;
+	}
+	else
+	{
+		setParent $gMainWindow;
+		menu -l "LarmorVoronoi" -to 1 -p $gMainWindow larmorVoronoiUI_menu;
+	}
+	
+	setParent -menu larmorVoronoiUI_menu;
+	menuItem -l "LarmorVoronoi Window" -ann "Open the main LarmorVoronoi window GUI" -c "larmorVoronoiUI_createWindow()" larmorVoronoiUI_menuWindow;
+	menuItem -d 1 larmorVoronoiUI_menuDivider;
+	menuItem -l "Help" -ann "View the online documentation" -c "system(\"load http://www.larmor.com/LarmorVoronoiMayaPlugin/?maya\")" larmorVoronoiUI_menuHelp;
+	
+	print("Loading LarmorVoronoi plugin completed.\n");
+}
+
+global proc larmorVoronoiUI_uninitialize()
+{
+	print("LarmorVoronoi plugin uninitialize...\n");
+	
+	deleteUI -menu larmorVoronoiUI_menu;
+	
+	print("LarmorVoronoi plugin uninitialize completed.\n");
+}
+
+global proc larmorVoronoiUI_createWindow()
+{
+	if ( `window -ex larmorVoronoiUI_mainWindow` )
+	{
+		showWindow larmorVoronoiUI_mainWindow;
+		return;
+	}
+
+	window -s 1 -t "LarmorVoronoi for Maya - www.larmor.com" -in "LarmorVoronoi" larmorVoronoiUI_mainWindow;
+	string $mainForm = `formLayout`;
+	tabLayout -scrollable true -innerMarginWidth 5 -innerMarginHeight 5 larmorVoronoiUI_windowTabs;
+
+	formLayout -e 
+		-af larmorVoronoiUI_windowTabs "top" 5
+		-af larmorVoronoiUI_windowTabs "left" 0 
+		-af larmorVoronoiUI_windowTabs "bottom" 0
+		-af larmorVoronoiUI_windowTabs "right" 0 
+	$mainForm;
+
+	string $shatterTab = larmorVoronoiUI_createShatterTab();
+	string $volumeTab = larmorVoronoiUI_createVolumeTab();
+	string $helpTab = larmorVoronoiUI_createHelpTab();
+
+	tabLayout -e
+		-tl $shatterTab "Mesh Shatter" 
+		-tl $volumeTab "Mesh Volume and Inertia tensor" 
+		-tl $helpTab "Help and Credits"
+	larmorVoronoiUI_windowTabs;
+
+	setParent ..;
+	string $frame = `frameLayout -lv 0`;
+	textField -ed 0 -bgc 0.8 0.9 0.8 -tx "LarmorVoronoi Plug-in status line" larmorVoronoiUI_statusLine;
+
+	formLayout -e
+		-an $frame  "top"
+		-af $frame  "left"   0
+		-af $frame  "bottom" 0
+		-af $frame  "right"  0
+	$mainForm;
+
+	showWindow larmorVoronoiUI_mainWindow;
+	window -e -wh 460 250 larmorVoronoiUI_mainWindow;
+}
+
+global proc string larmorVoronoiUI_createShatterTab()
+{
+	string $mainForm = `columnLayout -adj 1`;
+
+		radioButtonGrp -l "Voronoi points:"
+			-nrb 2 
+			-la2 "random points" "array MEL vector"
+			-sl 1 
+			-cc ("larmorVoronoiUI_changePointsMode();")
+			-cw3 220 100 100
+		lvUI_radioChangePoints;
+
+		intFieldGrp -numberOfFields 1
+			-label "Number of Voronoi cells:"
+			-cw2 220 50 
+			-value1 10
+		lvUI_intFieldNumberCells;
+
+		textFieldGrp
+			-label "Array MEL vector points variable name:"
+			-cw2 220 100 
+			-enable 0
+			-text ""
+		lvUI_textFieldVectorName;
+
+		checkBoxGrp -numberOfCheckBoxes 1
+			-label "Disjoint surface in same Voronoi cell:"
+			-cw2 220 50
+			-value1 0
+		lvUI_checkBoxDisjointMesh;
+
+		floatFieldGrp -numberOfFields 1
+			-label "Explode distance of Voronoi cells:"
+			-cw2 220 50 
+			-value1 0.0
+			-pre 3
+		lvUI_floatFieldExplodeDistance;
+
+		checkBoxGrp -numberOfCheckBoxes 1
+			-label "Use Delaunay 2D tr. for the cutted faces:"
+			-cw2 220 50
+			-cc1 ("larmorVoronoiUI_changeUseDelaunay();")
+			-value1 0
+		lvUI_checkBoxUseDelaunay;
+
+		floatFieldGrp -numberOfFields 1
+			-label "Delaunay 2D b criteria:"
+			-cw2 220 50 
+			-enable 0
+			-pre 3
+			-value1 0.125
+		lvUI_floatFieldDelaunayBCriteria;
+
+		floatFieldGrp -numberOfFields 1
+			-label "Delaunay 2D S criteria:"
+			-cw2 220 50 
+			-enable 0
+			-pre 3
+			-value1 0.0
+		lvUI_floatFieldDelaunaySCriteria;
+
+		rowLayout -nc 2;
+			button -l "Do Shatter" -ann "Run the Voronoi shatter" -c ("larmorVoronoiUI_shatterMesh();") -w 220 -h 30 lvUI_button1;
+			button -l "Close window" -ann "Close this window" -c ("larmorVoronoiUI_closeWindow();") -w 220 -h 30  lvUI_button2;
+		setParent ..;
+
+	setParent ..;
+	return $mainForm;
+}
+
+global proc string larmorVoronoiUI_createVolumeTab()
+{
+	string $mainForm = `columnLayout -adj 1`;
+
+		rowLayout -nc 2;
+			text -l "Multiple for Facet Distance:" lvUI_textMultipleFacetDistance;
+			floatField 
+				-pre 2
+				-w 50 
+				-v 100.00 
+			lvUI_floatFieldMultipleFacetDistance;
+		setParent ..;
+
+		frameLayout -cll 0 -cl 0 -mh 3 -mw 6 -h 140 -bs "etchedIn" -l "Result" -ann "Volume and Inertia tensor result frame";
+
+			floatFieldGrp -numberOfFields 1
+				-label "Mesh Volume:"
+				-cw2 120 80 
+				-enable 0
+				-value1 0.0
+				-pre 3
+			lvUI_floatFieldResultVolume;
+			
+			floatFieldGrp -numberOfFields 3
+				-label ""
+				-cw4 120 80 80 80 
+				-enable 0
+				-value1 0.0
+				-value2 0.0
+				-value3 0.0
+				-pre 3
+			lvUI_floatFieldResultInertiaRow1;
+			
+			floatFieldGrp -numberOfFields 3
+				-label "Mesh Inertia Tensor:"
+				-cw4 120 80 80 80 
+				-enable 0
+				-value1 0.0
+				-value2 0.0
+				-value3 0.0
+				-pre 3
+			lvUI_floatFieldResultInertiaRow2;
+			
+			floatFieldGrp -numberOfFields 3
+				-label ""
+				-cw4 120 80 80 80 
+				-enable 0
+				-value1 0.0
+				-value2 0.0
+				-value3 0.0
+				-pre 3
+			lvUI_floatFieldResultInertiaRow3;
+			
+		setParent ..;
+
+		rowLayout -nc 2;
+			button -l "Calcolate Volume and Inertia tensor" -ann "Run the Volume and Inertia tensor computation" -c ("larmorVoronoiUI_calcolateVolume();") -w 220 -h 30 lvUI_button3;
+			button -l "Close window" -ann "Close this window" -c ("larmorVoronoiUI_closeWindow();") -w 220 -h 30  lvUI_button4;
+		setParent ..;
+
+	setParent ..;
+	return $mainForm;
+}
+
+global proc string larmorVoronoiUI_createHelpTab()
+{
+	global string $larmorVoronoiUI_pluginInfo;
+	global string $larmorVoronoiUI_pluginVersion;
+	
+	string $larmorVoronoiUI_pluginInfoArray[];
+	tokenize $larmorVoronoiUI_pluginInfo "-" $larmorVoronoiUI_pluginInfoArray;
+	
+	string $mainForm = `columnLayout -adj 1`;
+
+		columnLayout;
+			text -l "LarmorVoronoi Maya Plug-in" -al "left" lvUI_creditText1;
+			text -l ("Plug-in Info: "+ $larmorVoronoiUI_pluginInfoArray[0]) -al "left" lvUI_creditText2;
+			text -l ("Plug-in Version: "+$larmorVoronoiUI_pluginVersion) -al "left" lvUI_creditText3;
+			text -l "Plug-in Author: Pier Paolo Ciarravano - www.larmor.com" -al "left" lvUI_creditText4;
+			text -l "LarmorVoronoi Maya Plug-in is Free Software released under the GNU/GPL License" -al "left" lvUI_creditText5;
+			text -l "LarmorVoronoi Maya Plug-in is part of the Larmor-Physx Voronoi Shatter C++ API" -al "left" lvUI_creditText6;
+		setParent ..;
+
+		rowLayout -nc 3;
+			button -l "Open online help page" -ann "View the online web site for the LarmorVoronoi Maya Plug-in" -c ("larmorVoronoiUI_openHelpPage();") -w 145 -h 30 lvUI_button5;
+			button -l "Open Larmor-Physx page" -ann "View the online Google Code page of the Larmor-Physx project" -c ("larmorVoronoiUI_openLarmorPhysxPage();") -w 145 -h 30 lvUI_button6;
+			button -l "Close window" -ann "Close this window" -c ("larmorVoronoiUI_closeWindow();") -w 145 -h 30  lvUI_button7;
+		setParent ..;
+		
+		rowLayout -nc 1;
+			
+		setParent ..;
+
+	setParent ..;
+	return $mainForm;
+}
+
+global proc larmorVoronoiUI_changeUseDelaunay()
+{
+    if (`checkBoxGrp -q -v1 lvUI_checkBoxUseDelaunay`)
+    {
+		floatFieldGrp -e -enable true lvUI_floatFieldDelaunayBCriteria;
+		floatFieldGrp -e -enable true lvUI_floatFieldDelaunaySCriteria;
+		larmorVoronoiUI_printStatusLine("Using Delaunay 2D triangulation, the refinement algorithm may not terminate");
+    }
+    else
+    {
+		floatFieldGrp -e -enable false lvUI_floatFieldDelaunayBCriteria;
+		floatFieldGrp -e -enable false lvUI_floatFieldDelaunaySCriteria;
+		larmorVoronoiUI_printStatusLine("");
+    }
+}
+
+global proc larmorVoronoiUI_changePointsMode()
+{
+	if (`radioButtonGrp -q -sl lvUI_radioChangePoints` == 1)
+	{
+		intFieldGrp -e -enable true lvUI_intFieldNumberCells;
+		textFieldGrp -e -enable false lvUI_textFieldVectorName;
+		larmorVoronoiUI_printStatusLine("");
+	}
+	else
+	{
+		intFieldGrp -e -enable false lvUI_intFieldNumberCells;
+		textFieldGrp -e -enable true lvUI_textFieldVectorName;
+		larmorVoronoiUI_printStatusLine("Using the array MEL vector method, the variable must be global and populated");
+	}
+}
+
+global proc larmorVoronoiUI_printStatusLine(string $out)
+{
+	if(`textField -ex larmorVoronoiUI_statusLine`) 
+	{
+		textField -e -bgc 0.8 0.9 0.8 -tx ("" + $out) larmorVoronoiUI_statusLine;
+	}
+	refresh;
+}
+
+global proc larmorVoronoiUI_openHelpPage()
+{
+	system("open -a Safari  http://www.larmor.com/LarmorVoronoiMayaPlugin/?maya");
+}
+
+global proc larmorVoronoiUI_openLarmorPhysxPage()
+{
+	system("open -a Safari  http://code.google.com/p/larmor-physx/");
+}
+
+global proc larmorVoronoiUI_calcolateVolume()
+{
+	float $floatFacetDistanceMultiple = `floatField -q -v lvUI_floatFieldMultipleFacetDistance`;
+
+	float $viVals[];
+	string $larmorVoronoiVolumeCommand = "LarmorVoronoi -vi " + $floatFacetDistanceMultiple;
+	larmorVoronoiUI_printStatusLine("Executing: " + $larmorVoronoiVolumeCommand + "; see the script output window...");
+	print("Executing command: " + $larmorVoronoiVolumeCommand + "\n");
+	$viVals = `eval($larmorVoronoiVolumeCommand)`;
+
+	floatFieldGrp -e -v1 $viVals[0] lvUI_floatFieldResultVolume;
+	floatFieldGrp -e -v1 $viVals[1] -v2 (-$viVals[5]) -v3 (-$viVals[6]) lvUI_floatFieldResultInertiaRow1;
+	floatFieldGrp -e -v1 (-$viVals[5]) -v2 $viVals[2] -v3 (-$viVals[4]) lvUI_floatFieldResultInertiaRow2;
+	floatFieldGrp -e -v1 (-$viVals[6]) -v2 (-$viVals[4]) -v3 $viVals[3] lvUI_floatFieldResultInertiaRow3;
+
+	larmorVoronoiUI_printStatusLine("Mesh Volume is: " + $viVals[0] + "; see the script output window for the complete output.");
+	print("See the script output window for the complete output.\n");
+}
+
+global proc larmorVoronoiUI_shatterMesh()
+{
+	larmorVoronoiUI_printStatusLine("");
+	
+	string $larmorVoronoiShatterCommand = "LarmorVoronoi";
+	
+	if (`radioButtonGrp -q -sl lvUI_radioChangePoints` == 1)
+    {
+		$larmorVoronoiShatterCommand += " -np " + `intFieldGrp -q -v1 lvUI_intFieldNumberCells`;
+	}
+    else
+    {
+		string $textVectorName = `textFieldGrp -q -text lvUI_textFieldVectorName`;
+		if ($textVectorName == "")
+		{
+			larmorVoronoiUI_printStatusLine("Array MEL vector points variable name is empty");
+			return;
+		}
+		$larmorVoronoiShatterCommand += " -p " + $textVectorName;
+    }
+	
+	if (`checkBoxGrp -q -v1 lvUI_checkBoxDisjointMesh`)
+    {
+		$larmorVoronoiShatterCommand += " -d 1";
+    }
+	
+	float $floatExplodeDistance = `floatFieldGrp -q -v1 lvUI_floatFieldExplodeDistance`;
+	if ($floatExplodeDistance > 0.0)
+	{
+		$larmorVoronoiShatterCommand += " -ex " + $floatExplodeDistance;
+	}
+	
+	if (`checkBoxGrp -q -v1 lvUI_checkBoxUseDelaunay`)
+    {
+		$larmorVoronoiShatterCommand += " -dy 1";
+		$larmorVoronoiShatterCommand += " -dyb " + `floatFieldGrp -q -v1 lvUI_floatFieldDelaunayBCriteria`;
+		$larmorVoronoiShatterCommand += " -dys " + `floatFieldGrp -q -v1 lvUI_floatFieldDelaunaySCriteria`;
+	}
+    	
+	larmorVoronoiUI_printStatusLine("Executing: " + $larmorVoronoiShatterCommand);
+	print("Executing command: " + $larmorVoronoiShatterCommand + "\n");
+	eval($larmorVoronoiShatterCommand);
+	larmorVoronoiUI_printStatusLine("Shatter completed, see the script output window for the complete output.");
+	print("See the script output window for the complete output.\n");
+}
+
+global proc larmorVoronoiUI_closeWindow()
+{
+	deleteUI -wnd larmorVoronoiUI_mainWindow;
+}
+

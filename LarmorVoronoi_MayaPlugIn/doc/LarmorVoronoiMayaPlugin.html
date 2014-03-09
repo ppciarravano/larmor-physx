@@ -1,5 +1,5 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>LarmorVoronoi Plugin for Maya 2012/2013/2014 - Pier Paolo Ciarravano</title>
+<title>LarmorVoronoi Plugin for Maya 2012/2013/2014 (Win/Mac/Linux) - Pier Paolo Ciarravano</title>
 <style type="text/css">
 	<!--
 		body {
@@ -167,7 +167,7 @@
 <body>
 <br>
 <table border="0" align="left" cellpadding="0" cellspacing="0">
-<tbody><tr><td class="toplinks"><h1>LarmorVoronoi Plugin for Maya 2012/2013/2014</h1>
+<tbody><tr><td class="toplinks"><h1>LarmorVoronoi Plugin for Maya 2012/2013/2014 (Win/Mac/Linux)</h1>
 <span class="authorname"><i>Author: Pier Paolo Ciarravano - <a href="http://www.larmor.com">www.larmor.com</a></i></span><br></td></tr>
 <tr><td><hr></td></tr>
 </tbody></table><br><br><br>
@@ -179,19 +179,22 @@
 <tr><td bgcolor="fcf7f1" align="left" valign="top">
   <b>Project description</b><br>
   <br>
-LarmorVoronoi is a Voronoi Shatter Plug-in in C++ for Maya 2012/2013/2014 that uses the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
+LarmorVoronoi is a Voronoi Shatter Plug-in in C++ for Maya 2012/2013/2014 (for Windows, Mac OS X and Linux) that uses the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
 The <a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">project</a> is Free Software released under the <a href="http://www.gnu.org/licenses/gpl.html">GNU/GPL License</a> and it is part of the <a href="http://code.google.com/p/larmor-physx/">Larmor-Physx Voronoi Shatter API</a>.<br><br>
 <ul>
 	<li>The Plugin implements a Voronoi shatter of non-convex closed triangle meshes (Maya polygon surfaces) using C++ and <a href="http://www.cgal.org/">CGAL</a></li>
 	<li>The shatter uses the Voronoi brute force algorithm implemented in multithreading</li>
-	<li>The cut faces are rebuilt using the Constrained Delaunay triangulation</li>
+	<li>The cut faces can be rebuilt using the Constrained Delaunay triangulation</li>
 	<li>The triangle meshes can contain multiple holes and cavities with nested objects</li>
 	<li>The algorithm can separate the disjointed surfaces</li>
-	<li>The Plugin can calculate the mesh's volume and the inertia tensor using the volume 3D Triangulation</li>
+	<li>The Plugin can calculate the mesh's volume and the inertia tensor (relative to the origin) using the volume 3D Triangulation</li>
 </ul>
-<a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">Google code source repository for Visual Studio 2010 project</a><br>
-<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/LarmorVoronoiMayaPlugin-1.1.0Beta-Build77.exe">Plug-in Binary version 1.1.0Beta-Build77 for Maya 2012/2013/2014 64 bit Windows.</a><br>
+<a href="http://code.google.com/p/larmor-physx/source/browse/#svn%2Ftrunk%2FLarmorVoronoi_MayaPlugIn%2FVS2010_src">Google code source repository project</a><br>
+<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/builds/macosx/" target="_blank">Plug-in Binary version 1.1.1Beta-Build78 for Maya 2012/2013/2014 Mac OS X.</a><br>
+<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/builds/linux/" target="_blank">Plug-in Binary version 1.1.1Beta-Build79 for Maya 2012/2013/2014 Linux (x86_64).</a><br>
+<a href="http://larmor-physx.googlecode.com/svn/trunk/LarmorVoronoi_MayaPlugIn/builds/windows/LarmorVoronoiMayaPlugin-1.1.0Beta-Build77.exe">Plug-in Binary version 1.1.0Beta-Build77 for Maya 2012/2013/2014 Windows (64 bit).</a><br>
 For last news, documentation updates and video tutorial visit the <a href="http://code.google.com/p/larmor-physx/">project page</a>.<br>
+<a href="http://www.creativecrash.com/maya/plugin/larmorvoronoi-plugin-for-maya-2012-2013-2014">CreativeCrash.com plug-in page</a>.<br><br>
 </td></tr>
 <tr><td align="cenger" valign="center"><br><hr><br></td></tr>
 
@@ -201,10 +204,10 @@ For last news, documentation updates and video tutorial visit the <a href="http:
   <br>
 Is possible use the MEL GUI window accessible from the new Maya menu <i>"LarmorVoronoi"</i> in order to use the plug-in easily. Using the GUI is possible have access to all the functionalities below described.<br><br>
 
-<img src="screenshot_1.jpg" alt="Mesh shatter window" width="452" height="353"><br>
-<h4>The new Maya menu "LarmorVoronoi" and the Mesh shatter window</h4><br><br>
+<img src="screenshot_1.jpg" alt="Mesh shatter window" width="478" height="368"><br>
+<h4>The new Maya menu "LarmorVoronoi" and the Mesh shatter window (vers. Mac OS X)</h4><br><br>
 <img src="screenshot_2.jpg" alt="Mesh Volume and Inertia tensor window" width="447" height="301"><br>
-<h4>The Mesh Volume and Inertia tensor window</h4><br><br>
+<h4>The Mesh Volume and Inertia tensor window (vers. Windows)</h4><br><br>
 
 To shatter one or more polygonal meshes the plugin works using the command <i>LarmorVoronoi</i> with this syntax:<br><br>
 <div id="codediv" class="CodeBox"><pre>
@@ -252,12 +255,12 @@ By default the Plug-in uses a simple 2D triangulation for the cutted faces; usin
 
 The generated meshes use the face colors to identify the cut surface: use Maya Mesh Component Display panel and check Display colors to see the mesh colors.<br><br><br> 
 
-To calculate the mesh volume and the inertia tensor use the command with this syntax:<br><br>
+To calculate the mesh volume and the inertia tensor (relative to the origin) use the command with this syntax:<br><br>
 <div id="codediv" class="CodeBox"><pre>
 LarmorVoronoi -vi float_facet_distance_multiple
 </pre></div><br>
-<i>float_facet_distance_multiple</i> is the multiple for the precision of volume and inertia calculation (e.g. 10, 100, 1000). These value improve the number of the tetrahedrons of the volume 3D triangulation used to calculate the volume and the inertia tensor.<br>
-The command returns in a float vector the mesh volume and the inertia tensor, to read this vector from MEL use this syntax: e.g.<br><br>
+<i>float_facet_distance_multiple</i> is the multiple for the precision of volume and inertia calculation (e.g. 10, 100, 1000). These value improve the number of the tetrahedrons of the volume 3D triangulation used to calculate the volume and the inertia tensor (relative to the origin).<br>
+The command returns in a float vector the mesh volume and the inertia tensor (relative to the origin), to read this vector from MEL use this syntax: e.g.<br><br>
 <div id="codediv" class="CodeBox"><pre>
 float $vals[];
 $vals = `LarmorVoronoi -vi 100`;
@@ -267,7 +270,7 @@ in <i>$vals</i> will be returned the follow values:<br><br>
 <div id="codediv" class="CodeBox"><pre>
 [volume, inertia_a, inertia_b, inertia_c, inertia_aa, inertia_bb, inertia_cc]
 </pre></div><br>
-where the inertia tensor is:<br>
+where the inertia tensor (relative to the origin) is:<br>
 <div class="math">
 	<table cellpadding="0" cellspacing="0" class="matrixbrak">
 	<tr><td class="lbrak">&nbsp;</td>
@@ -296,8 +299,16 @@ Please comment and report issues on the <a href="http://code.google.com/p/larmor
 <tr><td bgcolor="fcf7f1" align="left" valign="top">
   <b>Release Notes</b><br>
   <br>
+<b>Version: 1.1.1Beta-Build78 (Released 08/03/2014)</b><br>
+Stable Beta release for Maya 2012/2013/2014 for Mac OS X, with version check, complete commands and MEL GUI.<br>
+The multithreading is not active in this version.<br><br>
+
+<b>Version: 1.1.1Beta-Build79 (Released 08/03/2014)</b><br>
+Stable Beta release for Maya 2012/2013/2014 for Linux (x86_64), with version check, complete commands and MEL GUI.<br>
+The multithreading is not active in this version.<br><br>
+
 <b>Version: 1.1.0Beta-Build77 (Released 26/10/2013)</b><br>
-Stable Beta release for Maya 2012/2013/2014 64 bits (Windows) with version check, complete commands, MEL GUI and installer.<br>
+Stable Beta release for Maya 2012/2013/2014 for Windows (64 bits), with version check, complete commands, MEL GUI and installer.<br>
 Added a MEL GUI window accessible from a new Maya menu in order to use the plug-in easily.<br>
 Added simple 2D triangolation for the cutted faces.<br>
 Added a parameter to switch on the Delaunay 2D triangulation for the cutted faces.<br>
@@ -333,7 +344,7 @@ Contact the author Pier Paolo Ciarravano (<a href="http://www.larmor.com">www.la
 
 </tbody></table>
 
-<span class="authorname">Page last updated: Oct. 26th 2013</span>
+<span class="authorname">Page last updated: Mar. 8th 2014</span>
 <br><br>
 
 </body></html>

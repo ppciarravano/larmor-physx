@@ -84,7 +84,7 @@ class Build_triangle_mesh : public CGAL::Modifier_base<HDS> {
 			Triangle t = *triangleIter;
 			for (int i = 0;  i < 3; ++i)
 			{
-				Point v = t.vertex(i);
+				PointCGAL v = t.vertex(i);
 				B.add_vertex( PointKK(CGAL::to_double(v.x()), CGAL::to_double(v.y()), CGAL::to_double(v.z())) );
 				pointIndex++;
 			}
@@ -98,7 +98,7 @@ class Build_triangle_mesh : public CGAL::Modifier_base<HDS> {
 			B.begin_facet();
 			for (int i = 0;  i < 3; ++i)
 			{
-				Point v = t.vertex(i);
+				PointCGAL v = t.vertex(i);
 				B.add_vertex_to_facet(pointIndex);
 				pointIndex++;
 			}
@@ -119,7 +119,7 @@ double minimumEdgeLength(TrianglesList &triangles) {
 		Triangle t = *triangleIter;
 		for (int i = 0;  i < 3; ++i)
 		{
-			Point v = t.vertex(i);
+			PointCGAL v = t.vertex(i);
 			//find the minimum edge
 			FT distance = squared_distance(t.vertex(i),  t.vertex(i<2 ? i+1 : 0));
 			double distanceDouble = CGAL::to_double(distance);
@@ -136,7 +136,7 @@ double minimumEdgeLength(TrianglesList &triangles) {
 double minimumBoundingDimension(TrianglesList &triangles) {
 
 	MeshData meshData(triangles, TrianglesInfoList());
-	std::pair<Point,Point> bb = getMeshBoundingBox(meshData);
+	std::pair<PointCGAL,PointCGAL> bb = getMeshBoundingBox(meshData);
 	double xDimension = CGAL::to_double(bb.second.x()) - CGAL::to_double(bb.first.x());
 	double yDimension = CGAL::to_double(bb.second.y()) - CGAL::to_double(bb.first.y());
 	double zDimension = CGAL::to_double(bb.second.z()) - CGAL::to_double(bb.first.z());

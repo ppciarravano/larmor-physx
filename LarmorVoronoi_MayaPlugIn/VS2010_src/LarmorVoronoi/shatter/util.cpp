@@ -48,7 +48,7 @@ std::list<Triangle> toTriangles(ListCTriangle3d triangles)
 	for(triangleIter=triangles.begin(); triangleIter!= triangles.end(); ++triangleIter)
 	{
 		CTriangle3d t = *triangleIter;
-		Triangle triangle3d(Point(t.aX, t.aY, t.aZ), Point(t.bX, t.bY, t.bZ), Point(t.cX, t.cY, t.cZ));
+		Triangle triangle3d(PointCGAL(t.aX, t.aY, t.aZ), PointCGAL(t.bX, t.bY, t.bZ), PointCGAL(t.cX, t.cY, t.cZ));
 		output.push_back(triangle3d);
 	}
 
@@ -166,7 +166,7 @@ std::list<Triangle> readPlyMeshToTriangles(const char* meshFile)
 	int numVertexs, numFaces;
 
 	std::list<Triangle> output;
-	std::vector<Point> vertices;
+	std::vector<PointCGAL> vertices;
 
 	printf("Read PLY Points/Triangles Exact mesh from: %s\n", meshFile);
 
@@ -198,7 +198,7 @@ std::list<Triangle> readPlyMeshToTriangles(const char* meshFile)
 		//fscanf (pFile, "%lf %lf %lf %lf %lf", &xp, &yp, &zp, &t1, &t2);
 		//xp = xp /1000; yp = yp /1000; zp = zp /1000;
 		//printf("%f,%f,%f\n", xp, yp, zp );
-		Point vertex(xp, yp, zp);
+		PointCGAL vertex(xp, yp, zp);
 		vertices.push_back(vertex);
 	}
 	//printf("%f,%f,%f\n", xp, yp, zp );
@@ -225,7 +225,7 @@ std::list<Triangle> readOffMeshToTriangles(const char* meshFile)
 	int numVertexs, numFaces, temp;
 
 	std::list<Triangle> output;
-	std::vector<Point> vertices;
+	std::vector<PointCGAL> vertices;
 
 	printf("Read OFF Points/Triangles Exact mesh from: %s\n", meshFile);
 
@@ -245,7 +245,7 @@ std::list<Triangle> readOffMeshToTriangles(const char* meshFile)
 	{
 		fscanf (pFile, "%lf %lf %lf", &xp, &yp, &zp);
 		//printf("%f,%f,%f\n", xp, yp, zp );
-		Point vertex(xp, yp, zp);
+		PointCGAL vertex(xp, yp, zp);
 		vertices.push_back(vertex);
 	}
 	//printf("%f,%f,%f\n", xp, yp, zp );
@@ -271,7 +271,7 @@ std::list<Triangle> readObjMeshToTriangles(const char* meshFile)
 {
 
 	std::list<Triangle> output;
-	std::vector<Point> vertices;
+	std::vector<PointCGAL> vertices;
 
 	printf("Read OBJ Points/Triangles Exact mesh from: %s\n", meshFile);
 
@@ -284,7 +284,7 @@ std::list<Triangle> readObjMeshToTriangles(const char* meshFile)
 	while ( fgetc(pFile) != '\n' );
 
 	//Add fake vertex 0
-	Point vertex(0, 0, 0);
+	PointCGAL vertex(0, 0, 0);
 	vertices.push_back(vertex);
 
 	//Reading Vertexs
@@ -299,7 +299,7 @@ std::list<Triangle> readObjMeshToTriangles(const char* meshFile)
 
 			fscanf (pFile, "%lf %lf %lf", &xp, &yp, &zp);
 			//printf("%f,%f,%f (%d)\n", xp, yp, zp, vertices.size() );
-			Point vertex(xp, yp, zp);
+			PointCGAL vertex(xp, yp, zp);
 			vertices.push_back(vertex);
 
 		} else if ( strcmp(valStr,"f") == 0 ) {

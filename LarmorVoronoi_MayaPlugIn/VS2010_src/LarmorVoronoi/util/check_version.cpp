@@ -53,41 +53,200 @@ std::string urlencode(const std::string &s)
 }
 
 
-//Used to generate a unique id
-std::string getMACaddress()
-{
-	std::string macAddrs;
-	IP_ADAPTER_INFO adapterInfo[16];
-	DWORD dwBufLen = sizeof(adapterInfo);
-	DWORD dwStatus = GetAdaptersInfo(adapterInfo, &dwBufLen);
-	if (dwStatus == ERROR_SUCCESS)
+//Used to generate a unique id for different OS
+#if defined(WIN32)
+	// Windows
+	std::string getMACaddress()
 	{
-		PIP_ADAPTER_INFO pAdapterInfo = adapterInfo;
-		bool isFirst = true;
-		do
+		std::string macAddrs;
+		IP_ADAPTER_INFO adapterInfo[16];
+		DWORD dwBufLen = sizeof(adapterInfo);
+		DWORD dwStatus = GetAdaptersInfo(adapterInfo, &dwBufLen);
+		if (dwStatus == ERROR_SUCCESS)
 		{
-			//Add comma
-			if (!isFirst)
+			PIP_ADAPTER_INFO pAdapterInfo = adapterInfo;
+			bool isFirst = true;
+			do
 			{
-				macAddrs.append(",");				
-			}
-			isFirst = false;
+				//Add comma
+				if (!isFirst)
+				{
+					macAddrs.append(",");				
+				}
+				isFirst = false;
 
-			BYTE* MACData = pAdapterInfo->Address;
-			char macAddrChars[17];
-			sprintf(macAddrChars, "%02X-%02X-%02X-%02X-%02X-%02X",
-				MACData[0], MACData[1], MACData[2], MACData[3], MACData[4], MACData[5]);
-			macAddrs.append(macAddrChars);
-			pAdapterInfo = pAdapterInfo->Next;
+				BYTE* MACData = pAdapterInfo->Address;
+				char macAddrChars[17];
+				sprintf(macAddrChars, "%02X-%02X-%02X-%02X-%02X-%02X",
+					MACData[0], MACData[1], MACData[2], MACData[3], MACData[4], MACData[5]);
+				macAddrs.append(macAddrChars);
+				pAdapterInfo = pAdapterInfo->Next;
+			}
+			while(pAdapterInfo);
 		}
-		while(pAdapterInfo);
+		else
+		{
+			macAddrs.append("NO_MAC_ADDR");
+		}
+		return macAddrs;
 	}
-	else
+#elif defined(__APPLE__)
+	// Mac OS X
+	//Source code from http://wxwidgets.info/cross-platform-way-of-obtaining-mac-address-of-your-machine/
+ 	std::string getMACaddress()
 	{
-		macAddrs.append("NO_MAC_ADDR");
+		std::string macAddrs;
+
+		kern_return_t   kernResult = KERN_FAILURE;
+		io_iterator_t   intfIterator;
+		bool isFirst = true;
+
+		// looking for all the ethernet interfaces
+		CFMutableDictionaryRef  matchingDict;
+		CFMutableDictionaryRef  propertyMatchDict;
+ 		matchingDict = IOServiceMatching(kIOEthernetInterfaceClass);
+ 		if (NULL != matchingDict)
+		{
+			propertyMatchDict =	CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+ 			if (NULL != propertyMatchDict)
+			{
+				//CFDictionarySetValue(propertyMatchDict,	CFSTR(kIOPrimaryInterface), kCFBooleanTrue);
+				CFDictionarySetValue(matchingDict, CFSTR(kIOPropertyMatchKey), propertyMatchDict);
+				CFRelease(propertyMatchDict);
+			}
+		}
+		kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault,	matchingDict, &intfIterator);
+		
+		if (kernResult == KERN_SUCCESS)
+		{
+			io_object_t     intfService;
+			io_object_t     controllerService;
+
+			UInt8 MACData[6];
+			bzero(MACData, 6);
+
+			while ((intfService = IOIteratorNext(intfIterator)))
+			{
+				CFTypeRef   MACAddressAsCFData;       
+         
+				// IONetworkControllers can't be found directly by the IOServiceGetMatchingServices call,
+				// since they are hardware nubs and do not participate in driver matching. In other words,
+				// registerService() is never called on them. So we've found the IONetworkInterface and will
+				// get its parent controller by asking for it specifically.
+         
+				// IORegistryEntryGetParentEntry retains the returned object,
+				// so release it when we're done with it.
+				kernResult = IORegistryEntryGetParentEntry(intfService,	kIOServicePlane, &controllerService);
+         
+				if (KERN_SUCCESS == kernResult)
+				{
+					// Retrieve the MAC address property from the I/O Registry in the form of a CFData
+					MACAddressAsCFData = IORegistryEntryCreateCFProperty(controllerService,	CFSTR(kIOMACAddress), kCFAllocatorDefault, 0);
+					if (MACAddressAsCFData)
+					{
+						// Get the raw bytes of the MAC address from the CFData
+						CFDataGetBytes((CFDataRef)MACAddressAsCFData, CFRangeMake(0, kIOEthernetAddressSize), MACData);
+
+						//Add comma
+						if (!isFirst)
+						{
+							macAddrs.append(",");				
+						}
+						
+						char macAddrChars[17];
+						sprintf(macAddrChars, "%02X-%02X-%02X-%02X-%02X-%02X",
+							MACData[0], MACData[1], MACData[2], MACData[3], MACData[4], MACData[5]);
+						macAddrs.append(macAddrChars);
+
+						isFirst = false;
+
+						CFRelease(MACAddressAsCFData);
+					}
+             
+					// Done with the parent Ethernet controller object so we release it.
+					(void) IOObjectRelease(controllerService);
+				}
+         
+				// Done with the Ethernet interface object so we release it.
+				(void) IOObjectRelease(intfService);
+			}
+			
+		}
+
+		(void) IOObjectRelease(intfIterator);
+
+		if (isFirst)
+		{
+			macAddrs.append("NO_MAC_ADDR");
+		}
+		
+		return macAddrs;
 	}
-	return macAddrs;
-}
+
+#elif defined(LINUX) || defined(linux)
+	//Source code from http://wxwidgets.info/cross-platform-way-of-obtaining-mac-address-of-your-machine/
+	std::string getMACaddress()
+	{
+		std::string macAddrs;
+		bool isFirst = true;
+
+		struct ifreq ifr;
+		struct ifreq *IFR;
+		struct ifconf ifc;
+		char buf[1024];
+		int s, i;
+ 
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s != -1)
+		{
+			ifc.ifc_len = sizeof(buf);
+			ifc.ifc_buf = buf;
+			ioctl(s, SIOCGIFCONF, &ifc);
+ 
+			IFR = ifc.ifc_req;
+			for (i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; IFR++)
+			{
+				strcpy(ifr.ifr_name, IFR->ifr_name);
+				if (ioctl(s, SIOCGIFFLAGS, &ifr) == 0)
+				{
+					if (! (ifr.ifr_flags & IFF_LOOPBACK))
+					{
+						if (ioctl(s, SIOCGIFHWADDR, &ifr) == 0)
+						{
+							//Add comma
+							//if (!isFirst)
+							//{
+							//	macAddrs.append(",");				
+							//}
+						
+							char macAddrChars[17];
+							sprintf(macAddrChars, "%02X-%02X-%02X-%02X-%02X-%02X",
+								ifr.ifr_hwaddr.sa_data[0] & 0xFF,
+								ifr.ifr_hwaddr.sa_data[1] & 0xFF,
+								ifr.ifr_hwaddr.sa_data[2] & 0xFF,
+								ifr.ifr_hwaddr.sa_data[3] & 0xFF,
+								ifr.ifr_hwaddr.sa_data[4] & 0xFF,
+								ifr.ifr_hwaddr.sa_data[5] & 0xFF);
+							macAddrs.append(macAddrChars);
+
+							isFirst = false;
+							break;
+						}
+					}
+				}
+			}
+
+			shutdown(s, SHUT_RDWR);
+		}
+
+		if (isFirst)
+		{
+			macAddrs.append("NO_MAC_ADDR");
+		}
+		
+		return macAddrs;
+	}
+#endif
 
 
 class LarmorCheckProductVersionClient
@@ -329,3 +488,4 @@ std::string LarmorCheckProductVersion_getMessage()
 {
 	return LarmorCheckProductVersionClient::get_return_message();
 }
+

@@ -37,7 +37,7 @@
 	VectListCSegment2d vettorelisteseg;
 #endif
 
-inline bool isSignedDistancePositive(Plane &plane, Point point)
+inline bool isSignedDistancePositive(Plane &plane, PointCGAL point)
 {
 	//Se il punto e' sul piano questa funzione impiega molto piu' tempo per restituire un risultato
 	return compare_signed_distance_to_plane(plane, plane.point(), point) == CGAL::SMALLER;
@@ -204,17 +204,17 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 	if (intersectTriangles.size() == 1)
 	{
 		//build a triangle that is not intersecting the plane
-		Point pointOnPlane1 = plane.point();
+		PointCGAL pointOnPlane1 = plane.point();
 		Vector orthogonalVector = plane.orthogonal_vector();
-		Point pointNotOnPlane1 = Point(pointOnPlane1.x() + orthogonalVector.x(),
+		PointCGAL pointNotOnPlane1 = PointCGAL(pointOnPlane1.x() + orthogonalVector.x(),
 									pointOnPlane1.y() + orthogonalVector.y(),
 									pointOnPlane1.z() + orthogonalVector.z());
 		Vector base1 = plane.base1();
 		Vector base2 = plane.base2();
-		Point pointNotOnPlane2 = Point(pointNotOnPlane1.x() + base1.x(),
+		PointCGAL pointNotOnPlane2 = PointCGAL(pointNotOnPlane1.x() + base1.x(),
 									pointNotOnPlane1.y() + base1.y(),
 									pointNotOnPlane1.z() + base1.z());
-		Point pointNotOnPlane3 = Point(pointNotOnPlane1.x() + base2.x(),
+		PointCGAL pointNotOnPlane3 = PointCGAL(pointNotOnPlane1.x() + base2.x(),
 									pointNotOnPlane1.y() + base2.y(),
 									pointNotOnPlane1.z() + base2.z());
 		intersectTriangles.push_back(Triangle(pointNotOnPlane1, pointNotOnPlane2, pointNotOnPlane3));
@@ -250,7 +250,7 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 		//Get intersection points
 		CGAL::Object object = op.first;
 		Segment segment;
-		Point point;
+		PointCGAL point;
 		Triangle triangle;
 		if(CGAL::assign(segment,object))
 		{
@@ -289,11 +289,11 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 		//Ricostruzione striscia di intersezione
 		int numPositivePoints = 0;
 		int indexVertexNegativePoint = -1;
-		Point positivePoints[3];
+		PointCGAL positivePoints[3];
 
 		for (int i = 0;  i < 3; ++i)
 		{
-			Point triangleVertex = t.vertex(i);
+			PointCGAL triangleVertex = t.vertex(i);
 			//std::cout << triangleVertex.id() <<" " << t.vertex(i).id() << " " << (triangleVertex == t.vertex(i)) << "\n";
 			if (isSignedDistancePositive(plane, triangleVertex))
 			{
@@ -323,7 +323,7 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 
 			//Se sono qui ci deve essere un solo vertice nella parte
 			// negativa del piano corrispondente all'indice indexVertexNegativePoint
-			Point vertexNegative = t.vertex(indexVertexNegativePoint);
+			PointCGAL vertexNegative = t.vertex(indexVertexNegativePoint);
 			Segment triangleSide(vertexNegative, positivePoints[0]);
 			FT distance1 = squared_distance(triangleSide,  segment.start());
 			FT distance2 = squared_distance(triangleSide,  segment.end());
@@ -379,8 +379,8 @@ MeshData cutMesh(std::list<Triangle> &meshInput,  Plane plane, std::list<Triangl
 	for (segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 	{
 		Segment segment3d = *segmentIter;
-		Point start3d = segment3d.start();
-		Point end3d = segment3d.end();
+		PointCGAL start3d = segment3d.start();
+		PointCGAL end3d = segment3d.end();
 
 		//Proietto il punto 3d sul piano e ottengo un punto 2d
 		KPoint2 start = plane.to_2d(start3d);
@@ -686,7 +686,7 @@ bool faceBuilder_inexact(SegmentsArrangement &segmentsArrangment, TrianglesList 
 		{
 			Face face = *fit;
 
-			Point point3d[3];
+			PointCGAL point3d[3];
 			KPoint2 kpoint2[3];
 			for (unsigned int vertexIdx = 0; vertexIdx < 3; vertexIdx++)
 			{
@@ -829,7 +829,7 @@ bool faceBuilder_exact(SegmentsArrangement &segmentsArrangment, TrianglesList &m
 		{
 			FaceEX face = *fit;
 
-			Point point3d[3];
+			PointCGAL point3d[3];
 			KPoint2 kpoint2[3];
 			for (unsigned int vertexIdx = 0; vertexIdx < 3; vertexIdx++)
 			{
@@ -1098,7 +1098,7 @@ bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList
 		{
 			FaceDY face = *fit;
 
-			Point point3d[3];
+			PointCGAL point3d[3];
 			KPoint2 kpoint2[3];
 			for (unsigned int vertexIdx = 0; vertexIdx < 3; vertexIdx++)
 			{
@@ -1193,7 +1193,7 @@ bool faceBuilder_Delaunay(SegmentsArrangement &segmentsArrangment, TrianglesList
 
 				}
 
-				//proietto il punto 2d sul piano 3d (Point kernel esatto)
+				//proietto il punto 2d sul piano 3d (PointCGAL kernel esatto)
 				point3d[vertexIdx] = plane.to_3d(kpoint2[vertexIdx]);
 
 			}
@@ -1313,7 +1313,7 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 		//Get intersection points
 		CGAL::Object object = op.first;
 		Segment segment;
-		Point point;
+		PointCGAL point;
 		Triangle triangle;
 		if(CGAL::assign(segment,object))
 		{
@@ -1322,7 +1322,7 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 		}
 		else if(CGAL::assign(point,object))
 		{
-			//std::cout << "WARNING: intersection object is a Point" << std::endl;
+			//std::cout << "WARNING: intersection object is a PointCGAL" << std::endl;
 			//Se l'oggetto di intersezione e' un punto allora deve essere il vertice di un triangolo che devo
 			// aggiungere in meshOutput altrimenti viene escluso dalla striscia di intersezione
 			meshOutput.push_back(t);
@@ -1343,11 +1343,11 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 		//Ricostruzione striscia di intersezione
 		int numPositivePoints = 0;
 		int indexVertexNegativePoint = -1;
-		Point positivePoints[3];
+		PointCGAL positivePoints[3];
 
 		for (int i = 0;  i < 3; ++i)
 		{
-			Point triangleVertex = t.vertex(i);
+			PointCGAL triangleVertex = t.vertex(i);
 			//std::cout << triangleVertex.id() <<" " << t.vertex(i).id() << " " << (triangleVertex == t.vertex(i)) << "\n";
 			if (isSignedDistancePositive(plane, triangleVertex))
 			{
@@ -1372,7 +1372,7 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 
 			//Se sono qui ci deve essere un solo vertice nella parte
 			// negativa del piano corrispondente all'indice indexVertexNegativePoint
-			Point vertexNegative = t.vertex(indexVertexNegativePoint);
+			PointCGAL vertexNegative = t.vertex(indexVertexNegativePoint);
 			Segment triangleSide(vertexNegative, positivePoints[0]);
 			FT distance1 = squared_distance(triangleSide,  segment.start());
 			FT distance2 = squared_distance(triangleSide,  segment.end());
@@ -1409,7 +1409,7 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 	std::vector<Segment_2> outlineSegements;
 
 	#ifdef CUTTERMESHER_TEST_DEBUG
-	std::vector<Point> punti3d_frontiera;
+	std::vector<PointCGAL> punti3d_frontiera;
 	ListCSegment2d listasegtest;
 	ListSegment_2 listaSegs_2;
 	#endif
@@ -1419,8 +1419,8 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 	for (segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 	{
 		Segment segment3d = *segmentIter;
-		Point start3d = segment3d.start();
-		Point end3d = segment3d.end();
+		PointCGAL start3d = segment3d.start();
+		PointCGAL end3d = segment3d.end();
 
 		#ifdef CUTTERMESHER_TEST_DEBUG
 		punti3d_frontiera.push_back(start3d);
@@ -1652,7 +1652,7 @@ std::list<Triangle> cutMesh_UsingDelaunayMesh(std::list<Triangle> &meshInput, Pl
 		std::cout << "Generated mesh: number of vertices: " << cdt.number_of_vertices()	<< std::endl;
 		std::cout << "Generated mesh: number of faces: " << cdt.number_of_faces() << std::endl;
 
-		//Mappa che mappa tutti i vertex_handle non esatti in Point 3d esatti, gia' proiettati sul piano
+		//Mappa che mappa tutti i vertex_handle non esatti in PointCGAL 3d esatti, gia' proiettati sul piano
 		//Serve solo se la generazione della mesh ha creato punti interni che non sono punti delle facce originali di partenza
 		// quindi utilizzato da delaunay mesh, dato che questa crea punti oltre i punti dei contraint originali di partenza
 		MapExactPoints3d mapExactPoints3d;
@@ -1729,8 +1729,8 @@ vettorelisteseg.push_back(triangoliMesh);
 							kpoint2 = KPoint2(point2_vertex_handle.x(), point2_vertex_handle.y());
 						}
 
-						//proietto il punto 2d sul piano 3d (Point kernel esatto)
-						Point point3d = plane.to_3d(kpoint2);
+						//proietto il punto 2d sul piano 3d (PointCGAL kernel esatto)
+						PointCGAL point3d = plane.to_3d(kpoint2);
 
 						//inserisco il punto trovato nella mappa
 						mapExactPoints3d.insert(PairPointsInexactExact3d(face.vertex(vertexIdx), point3d));
@@ -1795,8 +1795,8 @@ puntiInterni.push_back(s2);
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_0->second) && (end3d == foundPoint3d_1->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1806,8 +1806,8 @@ for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segme
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_1->second) && (end3d == foundPoint3d_0->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1817,8 +1817,8 @@ for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segme
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_0->second) && (end3d == foundPoint3d_2->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1828,8 +1828,8 @@ for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segme
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_2->second) && (end3d == foundPoint3d_0->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1839,8 +1839,8 @@ for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segme
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_1->second) && (end3d == foundPoint3d_2->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1850,8 +1850,8 @@ for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segme
 for (std::list<Segment>::iterator segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.end(); ++segmentIter)
 {
 	Segment segment3d = *segmentIter;
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	if ((start3d == foundPoint3d_2->second) && (end3d == foundPoint3d_1->second))
 	{
 		intersectSegments.erase(segmentIter);
@@ -1889,8 +1889,8 @@ for (segmentIter = intersectSegments.begin(); segmentIter != intersectSegments.e
 {
 	Segment segment3d = *segmentIter;
 
-	Point start3d = segment3d.start();
-	Point end3d = segment3d.end();
+	PointCGAL start3d = segment3d.start();
+	PointCGAL end3d = segment3d.end();
 	KPoint2 start = plane.to_2d(start3d);
 	KPoint2 end = plane.to_2d(end3d);
 
@@ -1961,10 +1961,10 @@ vettorelisteseg.push_back(listasegtest);
 							p2_2d = foundPair->second;
 						}
 
-						//proietto il punto 2d sul piano 3d (Point kernel esatto)
-						Point p0_3d = plane.to_3d(p0_2d);
-						Point p1_3d = plane.to_3d(p1_2d);
-						Point p2_3d = plane.to_3d(p2_2d);
+						//proietto il punto 2d sul piano 3d (PointCGAL kernel esatto)
+						PointCGAL p0_3d = plane.to_3d(p0_2d);
+						PointCGAL p1_3d = plane.to_3d(p1_2d);
+						PointCGAL p2_3d = plane.to_3d(p2_2d);
 
 						//Aggiungo il triangolo alla mesh
 						meshOutput.push_back(Triangle(p0_3d, p1_3d, p2_3d));

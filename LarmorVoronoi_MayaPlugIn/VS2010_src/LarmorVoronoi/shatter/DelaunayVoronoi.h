@@ -73,7 +73,7 @@ typedef CGAL::Creator_uniform_3<double,KDPoint>  Pt_creator;
 typedef CGAL::Aff_transformation_3<KD>           KDTransformation;
 typedef KD::Triangle_3                           KDTriangle;
 
-typedef std::pair<MeshData,Point> TranslatedMeshData;
+typedef std::pair<MeshData,PointCGAL> TranslatedMeshData;
 //typedef std::list<TranslatedMeshData> TranslatedMeshDataList;
 
 //Main voronoiShatter Function
@@ -86,11 +86,11 @@ std::list<KDPoint> randomPointsInConcaveSphere(int numPoints, double innerRadius
 std::list<KDPoint> randomPointsOnSphereSurface(int numPoints, double radius);
 std::list<KDPoint> randomPointsInCube(int numPoints, double radius);
 std::list<KDPoint> randomPointsInBox(int numPoints, KDPoint min, KDPoint max);
-std::pair<Point,Point> getMeshBoundingBox(MeshData &meshData);
-KDPoint converPointExactToInexact(Point point);
-Point converPointInexactToExact(KDPoint point);
-Point getMeshBarycenter(MeshData &meshData);
-MeshData translateMesh(MeshData &meshData, Point point);
+std::pair<PointCGAL,PointCGAL> getMeshBoundingBox(MeshData &meshData);
+KDPoint converPointExactToInexact(PointCGAL point);
+PointCGAL converPointInexactToExact(KDPoint point);
+PointCGAL getMeshBarycenter(MeshData &meshData);
+MeshData translateMesh(MeshData &meshData, PointCGAL point);
 MeshData scaleMesh(MeshData &meshData, double scaleFactor);
 TrianglesList scaleAndCenterMesh(TrianglesList &meshTriangles, double scaleFactor);
 std::list<TranslatedMeshData> centerMeshesInBarycenter(std::list<MeshData> &listMeshData);
@@ -117,7 +117,7 @@ double minimumBoundingDimension(TrianglesList &triangles);
 std::vector<double> internalVolumeAndInertiaMesh(TrianglesList &triangles, double facetDistance); //Use facetDistance = 0.01
 
 //Functions definited in MeshMassProperties.cpp: doesn't work fine for holed meshes (and also for convex mesh too)
-void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, Point &cmReturn, Vector &inertiaReturn);
+void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, PointCGAL &cmReturn, Vector &inertiaReturn);
 
 //Functions definited in MeshSimplification.cpp
 TrianglesList meshSimplification(TrianglesList &triangles, int stopPredicate);
@@ -149,11 +149,11 @@ namespace boost {
 
 		class PointsMapperArchive {
 
-			std::map<Point, TripleDouble> mapPointsDoubleValues;
+			std::map<PointCGAL, TripleDouble> mapPointsDoubleValues;
 
 			public:
 
-				TripleDouble getMappedPoint(Point p);
+				TripleDouble getMappedPoint(PointCGAL p);
 		};
 
 		class text_oarchive_pointsmap: public text_oarchive, public PointsMapperArchive {
@@ -174,13 +174,13 @@ namespace boost {
 	} // namespace archive
 } // namespace boost
 
-//Boost Serialization template for Point, Triangle and TriangleInfo
+//Boost Serialization template for PointCGAL, Triangle and TriangleInfo
 namespace boost {
 	namespace serialization {
 
-		//Point
+		//PointCGAL
 		template<class Archive>
-		void save(Archive & ar, const Point & t, unsigned int version)
+		void save(Archive & ar, const PointCGAL & t, unsigned int version)
 		{
 			//std::cout << "save P" << std::endl;
 			/*
@@ -215,33 +215,33 @@ namespace boost {
 		}
 
 		template<class Archive>
-		void load(Archive & ar, Point & t, unsigned int version)
+		void load(Archive & ar, PointCGAL & t, unsigned int version)
 		{
 			//std::cout << "load P" << std::endl;
 			double x, y, z;
 			ar & x;
 			ar & y;
 			ar & z;
-			Point newT(x, y, z);
+			PointCGAL newT(x, y, z);
 			t = newT;
 		}
 
 		template<class Archive>
-		inline void serialize(Archive & ar, Point & t, const unsigned int file_version)
+		inline void serialize(Archive & ar, PointCGAL & t, const unsigned int file_version)
 		{
 			//std::cout << "serialize P" << std::endl;
 			split_free(ar, t, file_version);
 		}
-		//BOOST_SERIALIZATION_SPLIT_FREE(Point)
+		//BOOST_SERIALIZATION_SPLIT_FREE(PointCGAL)
 
 		//Triangle
 		template<class Archive>
 		void save(Archive & ar, const Triangle & t, unsigned int version)
 		{
 			//std::cout << "save T" << std::endl;
-			Point t1 = t.vertex(0);
-			Point t2 = t.vertex(1);
-			Point t3 = t.vertex(2);
+			PointCGAL t1 = t.vertex(0);
+			PointCGAL t2 = t.vertex(1);
+			PointCGAL t3 = t.vertex(2);
 			ar & t1;
 			ar & t2;
 			ar & t3;
@@ -251,7 +251,7 @@ namespace boost {
 		void load(Archive & ar, Triangle & t, unsigned int version)
 		{
 			//std::cout << "load T" << std::endl;
-			Point t1, t2, t3;
+			PointCGAL t1, t2, t3;
 			ar & t1;
 			ar & t2;
 			ar & t3;

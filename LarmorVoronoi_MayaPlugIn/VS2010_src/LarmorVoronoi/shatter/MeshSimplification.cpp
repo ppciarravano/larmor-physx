@@ -81,8 +81,8 @@ typedef Polyhedron::HalfedgeDS           HalfedgeDS;
 //typedef CGAL::Polyhedron_3<KernelForPolyhedron, CGAL::Polyhedron_items_with_id_3> Polyhedron;
 //typedef Polyhedron::HalfedgeDS      HalfedgeDS;
 
-typedef std::map<Point, int> MapPointId;
-typedef std::pair<Point, int> PairPointId;
+typedef std::map<PointCGAL, int> MapPointId;
+typedef std::pair<PointCGAL, int> PairPointId;
 
 struct IntUnorderedPair {
 
@@ -145,7 +145,7 @@ class Build_triangle_mesh_coherent_surface : public CGAL::Modifier_base<HDS> {
 	TrianglesList *trianglesList;
 
 	MapPointId mapPointId;
-	std::vector<Point> vertexPoints;
+	std::vector<PointCGAL> vertexPoints;
 
 	std::vector<TriangleVisitedInfoMS> trianglesVisited;
 
@@ -184,12 +184,12 @@ class Build_triangle_mesh_coherent_surface : public CGAL::Modifier_base<HDS> {
 			// loop for vertexes
 			for (int i = 0;  i < 3; ++i)
 			{
-				Point v = t.vertex(i);
+				PointCGAL v = t.vertex(i);
 
 				MapPointId::iterator foundPair = mapPointId.find(v);
 				if (foundPair == mapPointId.end())
 				{
-					// Point not found
+					// PointCGAL not found
 					Polyhedron::Vertex_handle vh = B.add_vertex( PointKK(CGAL::to_double(v.x()), CGAL::to_double(v.y()), CGAL::to_double(v.z())) );
 
 					mapPointId.insert(PairPointId(v, pointIndex));
@@ -287,7 +287,7 @@ class Build_triangle_mesh_coherent_surface : public CGAL::Modifier_base<HDS> {
 									std::vector<unsigned int> newVertexIndexes;
 									for (int vIdx = 0; vIdx < tvitv->vertexIndexes.size(); vIdx++)
 									{
-										Point vt = vertexPoints.at(tvitv->vertexIndexes.at(vIdx));
+										PointCGAL vt = vertexPoints.at(tvitv->vertexIndexes.at(vIdx));
 										B.add_vertex( PointKK(CGAL::to_double(vt.x()), CGAL::to_double(vt.y()), CGAL::to_double(vt.z())) );
 										vertexPoints.push_back(vt);
 										newVertexIndexes.push_back(pointIndex);
@@ -327,7 +327,7 @@ class Build_triangle_mesh_coherent_surface : public CGAL::Modifier_base<HDS> {
 											std::vector<unsigned int> newVertexIndexes;
 											for (int vIdx = 0; vIdx < tvitv->vertexIndexes.size(); vIdx++)
 											{
-												Point vt = vertexPoints.at(tvitv->vertexIndexes.at(vIdx));
+												PointCGAL vt = vertexPoints.at(tvitv->vertexIndexes.at(vIdx));
 												B.add_vertex( PointKK(CGAL::to_double(vt.x()), CGAL::to_double(vt.y()), CGAL::to_double(vt.z())) );
 												vertexPoints.push_back(vt);
 												newVertexIndexes.push_back(pointIndex);
@@ -421,7 +421,7 @@ TrianglesList meshSimplification(TrianglesList &triangles, int stopPredicate) {
 		{
 			if ( fit->is_triangle() )
 			{
-				Point verts[3];
+				PointCGAL verts[3];
 				int tick = 0;
 
 				Polyhedron::Halfedge_around_facet_circulator hit( fit->facet_begin() ), hend( hit );
@@ -429,7 +429,7 @@ TrianglesList meshSimplification(TrianglesList &triangles, int stopPredicate) {
 				{
 					if ( tick < 3 )
 					{
-						verts[tick++] = Point( hit->vertex()->point().x(), hit->vertex()->point().y(), hit->vertex()->point().z() );
+						verts[tick++] = PointCGAL( hit->vertex()->point().x(), hit->vertex()->point().y(), hit->vertex()->point().z() );
 					}
 					else
 					{
