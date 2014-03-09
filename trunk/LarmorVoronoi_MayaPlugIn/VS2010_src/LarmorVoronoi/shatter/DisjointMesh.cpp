@@ -73,7 +73,7 @@ struct NodeVisitedInfo {
 
 //used if boost::unordered_map
 struct PointHash {
-	size_t operator()(const Point& p) const {
+	size_t operator()(const PointCGAL& p) const {
 
 		//boost::hash<int> hasher;
 		//size_t valHash = hasher(p.id()); //is not possible use id because it is different for each point, also same points
@@ -89,15 +89,15 @@ struct PointHash {
 
 //used if boost::unordered_map
 struct PointEqual {
-  bool operator()(const Point& c1, const Point& c2) const {
+  bool operator()(const PointCGAL& c1, const PointCGAL& c2) const {
 	//std::cout << "EQ" << std::endl;
     return c1 == c2;
   }
 };
 
-//typedef boost::unordered_map<Point, NodeVisitedInfo, PointHash, PointEqual> MapPointVisitedInfo;
-typedef std::map<Point, NodeVisitedInfo> MapPointVisitedInfo;
-typedef std::pair<Point, NodeVisitedInfo> PairPointVisitedInfo;
+//typedef boost::unordered_map<PointCGAL, NodeVisitedInfo, PointHash, PointEqual> MapPointVisitedInfo;
+typedef std::map<PointCGAL, NodeVisitedInfo> MapPointVisitedInfo;
+typedef std::pair<PointCGAL, NodeVisitedInfo> PairPointVisitedInfo;
 
 //For Box Collision
 typedef CGAL::Box_intersection_d::Box_with_handle_d<double, 3, TriangleVisitedInfoDM*> BoxInt;
@@ -156,9 +156,9 @@ inline Triangle triangleScale(Triangle t)
 	KPoint2 an = transform(a);
 	KPoint2 bn = transform(b);
 	KPoint2 cn = transform(c);
-	Point an3 = p.to_3d(an);
-	Point bn3 = p.to_3d(bn);
-	Point cn3 = p.to_3d(cn);
+	PointCGAL an3 = p.to_3d(an);
+	PointCGAL bn3 = p.to_3d(bn);
+	PointCGAL cn3 = p.to_3d(cn);
 	Triangle tn(an3, bn3, cn3);
 	return tn;
 }
@@ -243,7 +243,7 @@ std::list<MeshData> disjointNonContiguousMeshes(MeshData &meshData) {
 
 		for (unsigned int i = 0;  i < 3; ++i)
 		{
-			Point v = (*tp).vertex(i);
+			PointCGAL v = (*tp).vertex(i);
 
 			MapPointVisitedInfo::iterator foundPair = mapPointVisitedInfo.find(v);
 			if (foundPair == mapPointVisitedInfo.end())
@@ -282,7 +282,7 @@ std::list<MeshData> disjointNonContiguousMeshes(MeshData &meshData) {
 	for(mapPointVisitedInfoIter = mapPointVisitedInfo.begin(); mapPointVisitedInfoIter != mapPointVisitedInfo.end(); ++mapPointVisitedInfoIter)
 	{
 		//Cerco il primo punto non visitato e lo marco come visitato, e lancio la visita non ricorsive su di esso
-		Point vStart = (*mapPointVisitedInfoIter).first;
+		PointCGAL vStart = (*mapPointVisitedInfoIter).first;
 		NodeVisitedInfo *pviStart = &((*mapPointVisitedInfoIter).second);
 
 		if (!pviStart->visited)
@@ -290,7 +290,7 @@ std::list<MeshData> disjointNonContiguousMeshes(MeshData &meshData) {
 			//Mark point visited
 			pviStart->visited = true;
 
-			std::list<Point> pointsToVisit;//lista per la visita non ricorsiva
+			std::list<PointCGAL> pointsToVisit;//lista per la visita non ricorsiva
 			pointsToVisit.push_back(vStart);
 
 			//List to add the triangles for the disjoint mesh
@@ -300,7 +300,7 @@ std::list<MeshData> disjointNonContiguousMeshes(MeshData &meshData) {
 			//Visit all triangles in pointsToVisit while is not empty
 			while (!pointsToVisit.empty())
 			{
-				Point v = pointsToVisit.front();
+				PointCGAL v = pointsToVisit.front();
 				pointsToVisit.pop_front();
 
 				//Aggiungo a pointsToVisit i punti connessi con p non ancora visitati:
@@ -327,7 +327,7 @@ std::list<MeshData> disjointNonContiguousMeshes(MeshData &meshData) {
 
 						for (unsigned int i = 0;  i < 3; ++i)
 						{
-							Point vAdjacent = (*(tvi->triangle)).vertex(i);
+							PointCGAL vAdjacent = (*(tvi->triangle)).vertex(i);
 							NodeVisitedInfo *pviAdjacent = &mapPointVisitedInfo[vAdjacent];
 							if (!pviAdjacent->visited)
 							{

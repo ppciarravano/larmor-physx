@@ -48,6 +48,22 @@ Var MODULE_FILE_LOCATION
 Var MAYA_USER_LOCATION
 
 
+; stop scripts that need the 8192 NSIS_MAX_STRLEN special build from compiling.
+; http://nsis.sourceforge.net/SetReqStrLen:_Allow_compile_w/_8192_special_build_only
+!macro SetReqStrLen Req_STRLEN
+	!define "Check_${NSIS_MAX_STRLEN}"
+	!ifndef "Check_${Req_STRLEN}"
+		!error "You're not using the ${Req_STRLEN} string length special build! \
+			${NSIS_MAX_STRLEN} is no good!"
+	!else
+		!undef "Check_${NSIS_MAX_STRLEN}"
+		!undef "SetReqStrLen"
+	!endif
+!macroend
+!define SetReqStrLen "!insertmacro SetReqStrLen"
+${SetReqStrLen} 8192
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Pages
 ;;;;;;;;;;;;;;;;;;;;;;;;;

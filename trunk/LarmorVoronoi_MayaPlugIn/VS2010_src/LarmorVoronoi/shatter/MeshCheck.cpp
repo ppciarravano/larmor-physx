@@ -52,7 +52,7 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel   Kernel;
 //typedef CGAL::Simple_cartesian<double>   Kernel;
 typedef Kernel::Triangle_3 Triangle;
-typedef Kernel::Point_3 Point;
+typedef Kernel::Point_3 PointCGAL;
 typedef Kernel::Plane_3 Plane;
 typedef Kernel::Point_2 KPoint2;
 
@@ -83,9 +83,9 @@ inline Triangle triangleScale(Triangle t)
 	KPoint2 an = transform(a);
 	KPoint2 bn = transform(b);
 	KPoint2 cn = transform(c);
-	Point an3 = p.to_3d(an);
-	Point bn3 = p.to_3d(bn);
-	Point cn3 = p.to_3d(cn);
+	PointCGAL an3 = p.to_3d(an);
+	PointCGAL bn3 = p.to_3d(bn);
+	PointCGAL cn3 = p.to_3d(cn);
 	Triangle tn(an3, bn3, cn3);
 	return tn;
 }

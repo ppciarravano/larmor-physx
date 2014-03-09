@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Larmor-Physx Version 1.0 2013
+ * Larmor-Physx Version 1.1.1 2013
  * Copyright (c) 2013 Pier Paolo Ciarravano - http://www.larmor.com
  * All rights reserved.
  *
@@ -65,15 +65,15 @@
 #include "util/check_version.h"
 
 //Plugin version
-#define PLUGIN_INFO "Vers.1.1.0Beta Build 77 (26/10/13) for Maya 2014 64bit - Author: Pier Paolo Ciarravano www.larmor.com"
-#define PLUGIN_VERSION "1.1.0Beta-77"
+#define PLUGIN_INFO "Vers.1.1.1Beta Build 78 (08/03/14) for Maya 2014 64bit - Author: Pier Paolo Ciarravano www.larmor.com"
+#define PLUGIN_VERSION "1.1.1Beta-78"
 
 //License and version check
-#define PRODUCT_NAME "LarmorVoronoiMayaPlugin_win2014x64"
-#define PRODUCT_VERSION_BUILD "1.1.0Beta-77"
+#define PRODUCT_NAME "LarmorVoronoiMayaPlugin_mac2014x64"
+#define PRODUCT_VERSION_BUILD "1.1.1Beta-78"
 
-typedef std::map<Point, MPoint>   MapPointMPoint;
-typedef std::pair<Point, MPoint>  PairPointMPoint;
+typedef std::map<PointCGAL, MPoint>   MapPointMPoint;
+typedef std::pair<PointCGAL, MPoint>  PairPointMPoint;
 
 class LarmorVoronoi: public MPxCommand
 {

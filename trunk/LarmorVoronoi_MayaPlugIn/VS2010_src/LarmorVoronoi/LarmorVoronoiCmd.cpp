@@ -125,7 +125,7 @@ MStatus uninitializePlugin( MObject obj)
 MStatus LarmorVoronoi::doIt( const MArgList& args )
 {
 	MGlobal::displayInfo("Start LarmorVoronoi...");
-	if ((LarmorCheckProductVersion_getCode() != 1) && (LarmorCheckProductVersion_getCode() != -1))
+	if (LarmorCheckProductVersion_getCode() != -1)
 	{
 		MGlobal::displayInfo(LarmorCheckProductVersion_getMessage().c_str());
 	}
@@ -387,7 +387,7 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 			{
 				TrianglesInfoList cutInfo = createNewTriangleInfoList(meshTrianglesToShatter);
 				MeshData meshData(meshTrianglesToShatter, cutInfo);
-				Point mb = getMeshBarycenter(meshData);
+				PointCGAL mb = getMeshBarycenter(meshData);
 				meshBarycenter = MVector( CGAL::to_double(mb.x()), CGAL::to_double(mb.y()), CGAL::to_double(mb.z()));
 				std::cout << "meshBarycenter for explode:" << meshBarycenter.x << ", " << meshBarycenter.y << ", "<< meshBarycenter.z << std::endl;
 			}
@@ -480,8 +480,8 @@ MStatus LarmorVoronoi::doIt( const MArgList& args )
 				//TODO: set mesh normals
 				// using MFnMesh::setVertexNormals and MFnMesh::setFaceVertexNormals
 				
-				//CGAL Point of translation for the barycenters
-				Point originObj = meshDataPartTranslated.second;
+				//CGAL PointCGAL of translation for the barycenters
+				PointCGAL originObj = meshDataPartTranslated.second;
 				double cm_x = CGAL::to_double(originObj.x());
 				double cm_y = CGAL::to_double(originObj.y());
 				double cm_z = CGAL::to_double(originObj.z());
@@ -655,9 +655,9 @@ int buildMeshTrianglesFromSelection(std::list<Triangle> &meshTrianglesToShatter)
 						*/
 
 						//Create the CGAL Points
-						Point p1(meshPoints[tv[0]].x, meshPoints[tv[0]].y, meshPoints[tv[0]].z);
-						Point p2(meshPoints[tv[1]].x, meshPoints[tv[1]].y, meshPoints[tv[1]].z);
-						Point p3(meshPoints[tv[2]].x, meshPoints[tv[2]].y, meshPoints[tv[2]].z);
+						PointCGAL p1(meshPoints[tv[0]].x, meshPoints[tv[0]].y, meshPoints[tv[0]].z);
+						PointCGAL p2(meshPoints[tv[1]].x, meshPoints[tv[1]].y, meshPoints[tv[1]].z);
+						PointCGAL p3(meshPoints[tv[2]].x, meshPoints[tv[2]].y, meshPoints[tv[2]].z);
 
 						//Add the triagle in meshTrianglesToShatter
 						meshTrianglesToShatter.push_back(Triangle(p1,p2,p3));
@@ -709,13 +709,13 @@ void buildVerticesAndConnections(MeshData &meshData,
 				
 		for (int i = 0; i < 3; ++i)
 		{
-			Point tv = t.vertex(i);
+			PointCGAL tv = t.vertex(i);
 
 			//Map used to not add different MPoint points for the same CGAL point
 			MapPointMPoint::iterator foundPointMPoint;
 			if ( (foundPointMPoint = mapPointMPoint.find(tv)) == mapPointMPoint.end())
 			{
-				//Point doesn't found in mapPointMPoint
+				//PointCGAL doesn't found in mapPointMPoint
 				double tx = CGAL::to_double(tv.x());
 				double ty = CGAL::to_double(tv.y());
 				double tz = CGAL::to_double(tv.z());
@@ -729,7 +729,7 @@ void buildVerticesAndConnections(MeshData &meshData,
 			}
 			else
 			{
-				//Point found in mapPointMPoint
+				//PointCGAL found in mapPointMPoint
 				pieceVertices[numVertex] = foundPointMPoint->second;
 				//pieceVertices.append(foundPointMPoint->second); //Don't use append if was used setLength 
 			}

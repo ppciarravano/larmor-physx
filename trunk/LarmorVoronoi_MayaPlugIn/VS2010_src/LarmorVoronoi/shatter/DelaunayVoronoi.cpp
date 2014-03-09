@@ -152,10 +152,10 @@ std::list<KDPoint> randomPointsInBox(int numPoints, KDPoint min, KDPoint max)
 	return randomPoints;
 }
 
-std::pair<Point,Point> getMeshBoundingBox(MeshData &meshData)
+std::pair<PointCGAL,PointCGAL> getMeshBoundingBox(MeshData &meshData)
 {
 	std::list<Triangle> meshTriangles = meshData.first;
-	std::list<Point> pointsInMesh;
+	std::list<PointCGAL> pointsInMesh;
 	std::list<Triangle>::iterator triangleIter;
 	for(triangleIter = meshTriangles.begin(); triangleIter != meshTriangles.end(); ++triangleIter)
 	{
@@ -167,23 +167,23 @@ std::pair<Point,Point> getMeshBoundingBox(MeshData &meshData)
 
 	Kernel::Iso_cuboid_3 isoCuboid = CGAL::bounding_box(pointsInMesh.begin(), pointsInMesh.end());
 
-	return std::pair<Point,Point>(isoCuboid.min(), isoCuboid.max());
+	return std::pair<PointCGAL,PointCGAL>(isoCuboid.min(), isoCuboid.max());
 }
 
 //TODO: use CGAL::Cartesian_converter<K1,K2> converter;
 //K1::Point_3 p_k1(1,2,3);
 //K2::Point_3 p_k2 = converter( p_k1 );
-KDPoint converPointExactToInexact(Point point)
+KDPoint converPointExactToInexact(PointCGAL point)
 {
 	return KDPoint(CGAL::to_double(point.x()), CGAL::to_double(point.y()), CGAL::to_double(point.z()));
 }
 
-Point converPointInexactToExact(KDPoint point)
+PointCGAL converPointInexactToExact(KDPoint point)
 {
-	return Point(CGAL::to_double(point.x()), CGAL::to_double(point.y()), CGAL::to_double(point.z()));
+	return PointCGAL(CGAL::to_double(point.x()), CGAL::to_double(point.y()), CGAL::to_double(point.z()));
 }
 
-Point getMeshBarycenter(MeshData &meshData)
+PointCGAL getMeshBarycenter(MeshData &meshData)
 {
 	std::list<Triangle> *meshTriangles = &(meshData.first);
 	std::list<KDTriangle> meshTrianglesInexact;
@@ -221,7 +221,7 @@ number type) or CGAL::Cartesian<CGAL::Lazy_exact_nt<CGAL::Gmpq> >
 a filtered number type).
 */
 
-MeshData translateMesh(MeshData &meshData, Point point)
+MeshData translateMesh(MeshData &meshData, PointCGAL point)
 {
 	std::list<Triangle> *meshTriangles = &(meshData.first);
 	//std::list<TriangleInfo> cutInfo = meshData.second;
@@ -266,9 +266,9 @@ MeshData scaleMesh(MeshData &meshData, double scaleFactor)
 		meshTrianglesScaled.push_back(triangleIter->transform(scale));
 
 		//Method 3: same memory problem of method 2
-		//Point v0(triangleIter->vertex(0).x()*scaleFactor, triangleIter->vertex(0).y()*scaleFactor, triangleIter->vertex(0).z()*scaleFactor );
-		//Point v1(triangleIter->vertex(1).x()*scaleFactor, triangleIter->vertex(1).y()*scaleFactor, triangleIter->vertex(1).z()*scaleFactor );
-		//Point v2(triangleIter->vertex(2).x()*scaleFactor, triangleIter->vertex(2).y()*scaleFactor, triangleIter->vertex(2).z()*scaleFactor );
+		//PointCGAL v0(triangleIter->vertex(0).x()*scaleFactor, triangleIter->vertex(0).y()*scaleFactor, triangleIter->vertex(0).z()*scaleFactor );
+		//PointCGAL v1(triangleIter->vertex(1).x()*scaleFactor, triangleIter->vertex(1).y()*scaleFactor, triangleIter->vertex(1).z()*scaleFactor );
+		//PointCGAL v2(triangleIter->vertex(2).x()*scaleFactor, triangleIter->vertex(2).y()*scaleFactor, triangleIter->vertex(2).z()*scaleFactor );
 		//meshTrianglesScaled.push_back(Triangle(v0, v1, v2));
 	}
 
@@ -297,13 +297,13 @@ TrianglesList scaleAndCenterMesh(TrianglesList &meshTriangles, double scaleFacto
 std::list<TranslatedMeshData> centerMeshesInBarycenter(std::list<MeshData> &listMeshData)
 {
 
-	std::list< std::pair<MeshData,Point> > result;
+	std::list< std::pair<MeshData,PointCGAL> > result;
 	std::list<MeshData>::iterator meshDataInter;
 	for(meshDataInter = listMeshData.begin(); meshDataInter != listMeshData.end(); ++meshDataInter)
 	{
 		MeshData meshData = *meshDataInter;
-		Point barycenter = getMeshBarycenter(meshData);
-		MeshData meshDataTranslated = translateMesh(meshData, Point(-barycenter.x(), -barycenter.y(), -barycenter.z()));
+		PointCGAL barycenter = getMeshBarycenter(meshData);
+		MeshData meshDataTranslated = translateMesh(meshData, PointCGAL(-barycenter.x(), -barycenter.y(), -barycenter.z()));
 		result.push_back(TranslatedMeshData(meshDataTranslated, barycenter));
 	}
 
@@ -386,9 +386,9 @@ class TBBVoronoiCell {
 				KDPoint p2 = segment.target();
 
 				//KDPoint mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
-				//Plane planeCutter_voronoi(Point(mp.x(), mp.y(), mp.z()), Vector(-vect.x(), -vect.y(), -vect.z()));
+				//Plane planeCutter_voronoi(PointCGAL(mp.x(), mp.y(), mp.z()), Vector(-vect.x(), -vect.y(), -vect.z()));
 				//TODO: potrebbe esserci un errore a causa dei punti non esatti p1 e p2
-				Point mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
+				PointCGAL mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
 				Plane planeCutter_voronoi(mp, Vector(-vect.x(), -vect.y(), -vect.z()));
 
 				MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo, useDelaunay, bCriteria, sCriteria);
@@ -495,9 +495,9 @@ std::list<MeshData> voronoiShatter(MeshData &meshData, std::list<KDPoint> points
 			KDPoint p2 = segment.target();
 
 			//KDPoint mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
-			//Plane planeCutter_voronoi(Point(mp.x(), mp.y(), mp.z()), Vector(-vect.x(), -vect.y(), -vect.z()));
+			//Plane planeCutter_voronoi(PointCGAL(mp.x(), mp.y(), mp.z()), Vector(-vect.x(), -vect.y(), -vect.z()));
 			//TODO: potrebbe esserci un errore a causa dei punti non esatti p1 e p2
-			Point mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
+			PointCGAL mp( (p1.x() + p2.x())/2.0, (p1.y() + p2.y())/2.0, (p1.z() + p2.z())/2.0);
 			Plane planeCutter_voronoi(mp, Vector(-vect.x(), -vect.y(), -vect.z()));
 
 			MeshData cutData = cutMesh(cutMeshTriangles, planeCutter_voronoi, cutInfo, useDelaunay, bCriteria, sCriteria);
@@ -544,7 +544,7 @@ std::list<MeshData> voronoiShatter_uniformDistributionPoints(TrianglesList &mesh
 std::list<MeshData> voronoiShatter_uniformDistributionPoints(MeshData &meshData, int numPoints, bool doDisjointMesh, bool useDelaunay, double bCriteria, double sCriteria)
 {
 	//Get Bounding Box
-	std::pair<Point,Point> boundingBox = getMeshBoundingBox(meshData);
+	std::pair<PointCGAL,PointCGAL> boundingBox = getMeshBoundingBox(meshData);
 	KDPoint bboxMin = converPointExactToInexact(boundingBox.first);
 	KDPoint bboxMax = converPointExactToInexact(boundingBox.second);
 
@@ -661,7 +661,7 @@ std::list<MeshData> rejointMeshesInDistance(std::list<MeshData> &listMeshData, K
 	std::list<MeshData> result;
 	std::list<MeshData> meshesToJoin;
 	double squaredDistance = distance * distance;
-	Point exactTargetPoint(targetPoint.x(), targetPoint.y(), targetPoint.z());
+	PointCGAL exactTargetPoint(targetPoint.x(), targetPoint.y(), targetPoint.z());
 
 	std::list<MeshData>::iterator meshDataInter;
 	for(meshDataInter = listMeshData.begin(); meshDataInter != listMeshData.end(); ++meshDataInter)
@@ -676,7 +676,7 @@ std::list<MeshData> rejointMeshesInDistance(std::list<MeshData> &listMeshData, K
 			//Algorithm 1: This algorithm excludes from the join the meshes on the radius
 			for (int i = 0; i < 3; ++i)
 			{
-				Point tv = t.vertex(i);
+				PointCGAL tv = t.vertex(i);
 
 				//it could be used a logic XNOR but it is not so understable, so I use this condition
 				if (isExternJoin)
@@ -706,7 +706,7 @@ std::list<MeshData> rejointMeshesInDistance(std::list<MeshData> &listMeshData, K
 			// sembra funzionare solo per isExternJoin, TODO: test
 			for (int i = 0; i < 3; ++i)
 			{
-				Point tv = t.vertex(i);
+				PointCGAL tv = t.vertex(i);
 
 				if (isExternJoin)
 				{
@@ -809,9 +809,9 @@ std::list<TranslatedMeshData> loadTranslatedMeshDataList(const char * filename, 
 namespace boost {
 	namespace archive {
 
-		TripleDouble PointsMapperArchive::getMappedPoint(Point p)
+		TripleDouble PointsMapperArchive::getMappedPoint(PointCGAL p)
 		{
-			std::map<Point, TripleDouble>::iterator foundPair = mapPointsDoubleValues.find(p);
+			std::map<PointCGAL, TripleDouble>::iterator foundPair = mapPointsDoubleValues.find(p);
 			if (foundPair == mapPointsDoubleValues.end())
 			{
 				double x = CGAL::to_double(p.x());
@@ -821,7 +821,7 @@ namespace boost {
 				tripleDouble.d1 = x;
 				tripleDouble.d2 = y;
 				tripleDouble.d3 = z;
-				mapPointsDoubleValues.insert(std::pair<Point, TripleDouble>(p, tripleDouble));
+				mapPointsDoubleValues.insert(std::pair<PointCGAL, TripleDouble>(p, tripleDouble));
 				return tripleDouble;
 			}
 			else

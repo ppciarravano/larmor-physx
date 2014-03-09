@@ -37,9 +37,22 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
-//For getMACaddress, used to generate a unique id 
-#include <Iphlpapi.h>
-#pragma comment(lib, "iphlpapi.lib")
+//For getMACaddress, used to generate a unique id
+#if defined(WIN32)
+    #include <Iphlpapi.h>
+	#pragma comment(lib, "iphlpapi.lib")
+#elif defined(__APPLE__)
+    #include <CoreFoundation/CoreFoundation.h>
+	#include <IOKit/IOKitLib.h>
+	#include <IOKit/network/IOEthernetInterface.h>
+	#include <IOKit/network/IONetworkInterface.h>
+	#include <IOKit/network/IOEthernetController.h>
+#elif defined(LINUX) || defined(linux)
+	#include <net/if.h>
+	#include <sys/ioctl.h>
+	#include <sys/socket.h>
+	#include <arpa/inet.h>
+#endif
 
 #define SERVER_CHECK_VERSION ""
 #define PATH_CHECK_VERSION ""

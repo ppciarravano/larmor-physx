@@ -62,7 +62,7 @@ inline void subexpressions_integral_terms(REALD w0, REALD w1, REALD w2, REALD &f
 //The return values are the mass, the center of mass, and the inertia tensor relative to the
 // center of mass. The code assumes that the rigid body has constant density 1. If the rigid body has constant
 // density D, then you need to multiply the output mass by D and the output inertia tensor by D.
-void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, Point &cmReturn, Vector &inertiaReturn)
+void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, PointCGAL &cmReturn, Vector &inertiaReturn)
 {
 	const REALD mult[10] = {1./6., 1./24., 1./24., 1./24., 1./60., 1./60., 1/60., 1./120., 1./120., 1./120.};
 	REALD intg[10] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.}; // order: 1, x, y, z, x^2, y^2, z^2, xy, yz, zx
@@ -137,7 +137,7 @@ void calculateMassCenterInertia(TrianglesList &triangles, double &massReturn, Po
 
 	//Return the references values
 	massReturn = fabs(mass);
-	cmReturn = Point(cm_x, cm_y, cm_z);
+	cmReturn = PointCGAL(cm_x, cm_y, cm_z);
 	inertiaReturn = Vector(inertia_xx, inertia_yy, inertia_zz);
 
 }
