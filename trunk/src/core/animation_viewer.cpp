@@ -49,7 +49,7 @@ namespace LarmorPhysxViewer
 	// Timing Variables
 	int g_nFPS = 0;
 	int g_nFrames = 0;
-	DWORD g_dwLastFPS = 0;
+	clock_t g_lastFPS = 0;
 	clock_t time_now;
 	clock_t movement_timer = 0;
 
@@ -228,9 +228,10 @@ namespace LarmorPhysxViewer
 	{
 
 		//FPS counter
-		if( GetTickCount() - g_dwLastFPS >= 1000 )
+		clock_t g_nowFPS = clock();
+		if( g_nowFPS - g_lastFPS >= CLOCKS_PER_SEC )
 		{
-			g_dwLastFPS = GetTickCount();
+			g_lastFPS = g_nowFPS;
 			g_nFPS = g_nFrames;
 			g_nFrames = 0;
 
@@ -586,7 +587,7 @@ namespace LarmorPhysxViewer
 	{
 		//framerate limit
 		time_now = clock();
-		if (time_now - movement_timer > (CLK_TCK/(LarmorPhysx::ConfigManager::steps_per_second * 1.0)))
+		if (time_now - movement_timer > (CLOCKS_PER_SEC / (LarmorPhysx::ConfigManager::steps_per_second * 1.0)))
 		{
 			//std::cout << "s: " << (time_now - movement_timer) << std::endl;
 			movement_timer = time_now;

@@ -45,12 +45,12 @@ namespace LarmorPhysx
 		//Create directory structure
 		std::cout << "Rib Generator: Create directory structure" << std::endl;
 		createNotExistsDir("rib_scene");
-		createNotExistsDir("rib_scene\\cameras");
-		createNotExistsDir("rib_scene\\lights");
-		createNotExistsDir("rib_scene\\objects");
-		createNotExistsDir("rib_scene\\renders");
-		createNotExistsDir("rib_scene\\scenes");
-		createNotExistsDir("rib_scene\\surfaces");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "cameras");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "lights");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "objects");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "renders");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "scenes");
+		createNotExistsDir("rib_scene" FILE_SEPARATOR_CHAR "surfaces");
 
 		//Load Frames and rib generation
 		unsigned int idFrame = LarmorPhysx::ConfigManager::start_load_frame;
@@ -128,7 +128,7 @@ namespace LarmorPhysx
 		char bufferFileNumber[10];
 		sprintf(bufferFileNumber, "%05d", idFrame);
 		std::stringstream fileName;
-		fileName << "rib_scene\\scenes\\scene_" << bufferFileNumber << ".rib";
+		fileName << "rib_scene" FILE_SEPARATOR_CHAR "scenes" FILE_SEPARATOR_CHAR "scene_" << bufferFileNumber << ".rib";
 		FILE* oFile = fopen(fileName.str().c_str(), "w");
 
 		fprintf(oFile, "## Scene frame: %s\n\n", bufferFileNumber);
@@ -165,7 +165,7 @@ namespace LarmorPhysx
 		char bufferFileNumber[10];
 		sprintf(bufferFileNumber, "%05d", idFrame);
 		std::stringstream fileName;
-		fileName << "rib_scene\\scenes\\scene_" << bufferFileNumber << ".rib";
+		fileName << "rib_scene" FILE_SEPARATOR_CHAR "scenes" FILE_SEPARATOR_CHAR "scene_" << bufferFileNumber << ".rib";
 		FILE* oFile = fopen(fileName.str().c_str(), "w");
 
 		fprintf(oFile, "## Scene frame: %s\n\n", bufferFileNumber);
@@ -266,7 +266,7 @@ namespace LarmorPhysx
 		char bufferFileNumber[10];
 		sprintf(bufferFileNumber, "%05d", idFrame);
 		std::stringstream fileName;
-		fileName << "rib_scene\\frame_" << bufferFileNumber << ".rib";
+		fileName << "rib_scene" FILE_SEPARATOR_CHAR "frame_" << bufferFileNumber << ".rib";
 		FILE* oFile = fopen(fileName.str().c_str(), "w");
 
 		fprintf(oFile, "## Pier Paolo Ciarravano LarmorPhysics RIB Generator\n");
@@ -303,7 +303,7 @@ namespace LarmorPhysx
 		char bufferFileNumber[10];
 		sprintf(bufferFileNumber, "%05d", idFrame);
 		std::stringstream fileName;
-		fileName << "rib_scene\\cameras\\camera_" << bufferFileNumber << ".rib";
+		fileName << "rib_scene" FILE_SEPARATOR_CHAR "cameras" FILE_SEPARATOR_CHAR "camera_" << bufferFileNumber << ".rib";
 		FILE* oFile = fopen(fileName.str().c_str(), "w");
 
 		fprintf(oFile, "## Camera frame: %s\n\n", bufferFileNumber);
@@ -363,7 +363,7 @@ namespace LarmorPhysx
 	{
 		unsigned int idObj = staticObject.idObj;
 		std::stringstream fileName;
-		fileName << "rib_scene\\objects\\mesh_" << idObj << ".rib";
+		fileName << "rib_scene" FILE_SEPARATOR_CHAR "objects" FILE_SEPARATOR_CHAR "mesh_" << idObj << ".rib";
 
 		FILE* oFile = fopen(fileName.str().c_str(), "w");
 		fprintf(oFile, "# Object id: %d\n\n", idObj);

@@ -56,7 +56,13 @@
 #include "../shatter/DelaunayVoronoi.h"
 #include "ConfigManager.h"
 
-#define FILE_SEPARATOR_CHAR "\\"
+#if defined(WIN32) || defined(WIN64)
+	//Windows file separator
+	#define FILE_SEPARATOR_CHAR "\\"
+#elif defined(__APPLE__) || defined(LINUX) || defined(linux)
+	//Linux/OSX file separator
+	#define FILE_SEPARATOR_CHAR "/"
+#endif
 
 #define LReal double
 

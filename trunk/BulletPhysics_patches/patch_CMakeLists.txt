@@ -1,17 +1,17 @@
 diff  CMakeLists.txt CMakeLists.txt
 9a10,24
 > 
-> INCLUDE_DIRECTORIES("C:/LARMOR/DEVELOP/CGAL-3.9/include")
-> INCLUDE_DIRECTORIES("C:/LARMOR/DEVELOP/CGAL-3.9/BIN_BUILD2/include")
-> INCLUDE_DIRECTORIES("C:/LARMOR/DEVELOP/boost_1_47_0")
-> INCLUDE_DIRECTORIES("C:/LARMOR/DEVELOP/gmplib/gmp-4.3.2")
-> INCLUDE_DIRECTORIES("C:/LARMOR/DEVELOP/core-2.1_lib/core-2.1.1/builds/mpfr-3.0.0")
-> LINK_DIRECTORIES("C:/LARMOR/DEVELOP/CGAL-3.9/BIN_BUILD2/lib")
-> LINK_DIRECTORIES("C:/LARMOR/DEVELOP/boost_1_47_0_64/lib")
-> LINK_DIRECTORIES("C:/LARMOR/DEVELOP/gmplib/gmp-4.3.2/.libs")
-> LINK_DIRECTORIES("C:/LARMOR/DEVELOP/core-2.1_lib/core-2.1.1/builds/mpfr-3.0.0/.libs")
-> LINK_DIRECTORIES("C:/LARMOR/DEVELOP/boost_1_47_0/bin.v2/libs/serialization/build/gcc-mingw-4.5.2/release/link-static/threading-multi")
+> INCLUDE_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/CGAL-4.2/include")
+> INCLUDE_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/CGAL_bin/include")
+> INCLUDE_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/boost_1_53_0")
+> INCLUDE_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/gmp-5.1.3")
+> INCLUDE_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/mpfr-3.1.2/src")
+> LINK_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/CGAL_bin/lib")
+> LINK_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/boost_1_53_0/stage/lib")
+> LINK_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/gmp-5.1.3/.libs")
+> LINK_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/mpfr-3.1.2/src/.libs")
+> LINK_DIRECTORIES("/home/larmor/DEVELOP/LarmorPhysx/third-party/boost_1_53_0/bin.v2/libs/serialization/build/gcc-4.8.2/release/link-static/threading-multi")
 > #target posizionato in cmake in src/BulletCollision
-> #TARGET_LINK_LIBRARIES(BulletCollision CGAL CGAL_Core CGAL_ImageIO boost_thread-mgw45-mt-1_47 boost_serialization-mgw45-mt-1_47 mpfr)
+> #TARGET_LINK_LIBRARIES(BulletCollision CGAL boost_thread boost_serialization boost_system mpfr gmp)
 > 
 > 

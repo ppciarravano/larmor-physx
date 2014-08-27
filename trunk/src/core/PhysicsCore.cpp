@@ -30,6 +30,7 @@
 #include "PhysicsCore.h"
 
 #define BT_USE_DOUBLE_PRECISION 1
+//#define BULLET_USE_CGAL_PATCH 1 
 
 //for the Bullet Physics friction and restitution callback
 extern ContactAddedCallback		gContactAddedCallback;
@@ -94,16 +95,19 @@ namespace LarmorPhysx
 			{
 				std::cout << "PhysicsCore::initPhysics" << std::endl;
 
-				//Setting not_use_cgal_collision == false then is using CGAL Triangles collision in Bullet Physics
-				if (LarmorPhysx::ConfigManager::not_use_cgal_collision)
-				{
-					btGImpactCollisionAlgorithm::useCGALTriangleCollision(false);
-				}
-				std::cout << "isUsingCGALTriangleCollision: " << btGImpactCollisionAlgorithm::isUsingCGALTriangleCollision() << std::endl;
+				#ifdef BULLET_USE_CGAL_PATCH
+					//Setting not_use_cgal_collision == false then is using CGAL Triangles collision in Bullet Physics
+					if (LarmorPhysx::ConfigManager::not_use_cgal_collision)
+					{
+						btGImpactCollisionAlgorithm::useCGALTriangleCollision(false);
+					}
+					std::cout << "isUsingCGALTriangleCollision: " << btGImpactCollisionAlgorithm::isUsingCGALTriangleCollision() << std::endl;
 
-				//Not do the custom CGAL Collision log
-				btGImpactCollisionAlgorithm::doLogCGALTriangleCollision(false);
-
+					//Not do the custom CGAL Collision log
+					btGImpactCollisionAlgorithm::doLogCGALTriangleCollision(false);
+				#else				
+					std::cout << "isUsingCGALTriangleCollision: NO BULLET CGAL PATCH" << std::endl;
+				#endif
 
 				//Init the Bullet Physics friction and restitution callback
 				//http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
@@ -304,140 +308,6 @@ namespace LarmorPhysx
 				LarmorPhysx::saveFrame(stepFrame);
 
 			}
-
-
-			/* OK
-			//Shatter action algorithm
-			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
-			{
-
-				//Shatter condition
-				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 3))
-				{
-					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
-							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
-
-					//Build Complete shattered pieces of mesh
-					int numShatterPieces = dynamicObject->staticObject.volume / dynamicObject->staticObject.breakCoefficient;
-					numShatterPieces = 3;
-					if (numShatterPieces >= 2)
-					{
-						std::cout << " numShatterPieces: " << numShatterPieces << std::endl;
-						//Point parentOriginObj = staticObject.meshData.second;
-						//Call shatter function
-						std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, numShatterPieces, false);
-						std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
-
-						return shatterMeshes;
-					}
-					else
-					{
-						std::cout << " ******* NOT SHATTERED numShatterPieces < 2 " << std::endl;
-					}
-				}
-
-				std::list<TranslatedMeshData> shatterMeshes;
-				return shatterMeshes;
-			}
-			*/
-
-
-			/*
-			 unsigned int idObj1;
-			unsigned int idObj2;
-			LVector3 contactPoint;
-			LReal forceModule;
-			LVector3 collisionDirection;
-
-			typedef std::list<Triangle>      TrianglesList;     //Non utilizzato in CutterMesher.cpp
-typedef std::list<TriangleInfo>  TrianglesInfoList; //Non utilizzato in CutterMesher.cpp
-typedef std::pair<TrianglesList, TrianglesInfoList> MeshData;
-typedef std::pair<MeshData,Point> TranslatedMeshData;
-
-LVector3 p = cpMax.contactPoint;
-			 */
-
-			/*
-			//Shatter action algorithm
-			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
-			{
-
-				//Shatter condition
-				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 1))
-				{
-					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
-							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
-
-					//Collision point
-					LVector3 p = cpMax.contactPoint;
-
-					//Call shatter function
-					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 100, false);
-					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_sphereDistributionOnPoint(dynamicObject->staticObject.meshData.first, 100, KDPoint(p.x, p.y, p.z), 1.0, false);
-					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
-
-					return shatterMeshes;
-				}
-
-				std::list<TranslatedMeshData> shatterMeshes;
-				return shatterMeshes;
-			}
-			 */
-
-
-			//Shatter action algorithm: wood
-			std::list<TranslatedMeshData> PhysicsCore::shatterObject(DynamicObject* dynamicObject, CollisionPoint& cpMax)
-			{
-
-				//Shatter condition
-				if ((cpMax.forceModule >= dynamicObject->staticObject.hardnessCoefficient) && (dynamicObject->shatterLevel < 1))
-				{
-					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
-							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
-
-					//Collision point
-					LVector3 p = cpMax.contactPoint;
-
-					//std::list<KDPoint> points;
-					//for (int y = -10; y <= 10; ++ y) {
-					//	double number = (rand() % 10) * 0.02;
-					//	KDPoint vp(0.0, y, p.z + number);
-					//	points.push_back(vp);
-					//}
-
-					std::list<KDPoint> points;
-					for (int y = -10; y <= 10; y += 4) {
-						double number = (rand() % 10) * 0.05 / 20.0;
-						KDPoint vp(0.0, y / 20.0 , p.z + number);
-						points.push_back(vp);
-					}
-
-					//Call shatter function
-					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 10, false);
-					//std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_sphereDistributionOnPoint(dynamicObject->staticObject.meshData.first, 100, KDPoint(p.x, p.y, p.z), 10.0, false);
-					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter(dynamicObject->staticObject.meshData.first, points);
-					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
-
-					return shatterMeshes;
-				}
-				/*
-				else if ( (cpMax.forceModule >= 3.0) &&
-						((dynamicObject->shatterLevel == 1) || (dynamicObject->shatterLevel == 2)) )
-				{
-					std::cout << "Doing Voronoi Shatter: objId: " << dynamicObject->idObj << " collision impulse: " << cpMax.forceModule <<
-							" point: ("<< cpMax.contactPoint.x << ", " << cpMax.contactPoint.y << ", " << cpMax.contactPoint.z << ")" << std::endl;
-
-					//Call shatter function
-					std::list<MeshData> shatterMeshesNoCentered = voronoiShatter_uniformDistributionPoints(dynamicObject->staticObject.meshData.first, 2, false);
-					std::list<TranslatedMeshData> shatterMeshes = centerMeshesInBarycenter(shatterMeshesNoCentered);
-
-					return shatterMeshes;
-				}
-				 */
-				std::list<TranslatedMeshData> shatterMeshes;
-				return shatterMeshes;
-			}
-
 
 
 			//Core function for Voronoi Shatter
