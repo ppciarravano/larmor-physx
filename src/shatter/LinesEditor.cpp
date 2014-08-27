@@ -32,9 +32,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "windows.h"
-#include "gl/gl.h"
-#include "gl/glu.h"
+#if defined(WIN32) || defined(WIN64)
+	#include "windows.h"
+	#include "gl/gl.h"
+	#include "gl/glu.h"
+#elif defined(__APPLE__) || defined(LINUX) || defined(linux)
+	#include "GL/gl.h"
+	#include "GL/glu.h"
+#endif
 
 //#define FREEGLUT_STATIC
 #include "GL/freeglut.h"

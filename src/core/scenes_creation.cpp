@@ -1609,7 +1609,7 @@ namespace LarmorPhysx
 
 		/*
 		//Stanford Dragon mesh
-		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_recon\\dragon_vrip_res3.ply"); //dragon_vrip.ply
+		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_vrip_res2.ply"); //dragon_vrip.ply
 		std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
 		std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 50);
 		//std::list<Triangle> outTriangles = readedTriangles;
@@ -1749,7 +1749,7 @@ namespace LarmorPhysx
 
 
 		//Stanford Dragon mesh
-		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_recon\\dragon_vrip_res3.ply"); //dragon_vrip_res2.ply
+		std::list<Triangle> readedTriangles = readPlyMeshToTriangles("dragon_vrip_res2.ply"); //dragon_vrip_res2.ply
 		//std::cout << "readedTriangles size:" << readedTriangles.size() << std::endl;
 		//std::list<Triangle> outTriangles = scaleAndCenterMesh(readedTriangles, 50);
 		////std::list<Triangle> outTriangles = readedTriangles;
