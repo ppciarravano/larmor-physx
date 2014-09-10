@@ -47,6 +47,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#define BT_USE_DOUBLE_PRECISION 1
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 
 #include <boost/serialization/vector.hpp>
