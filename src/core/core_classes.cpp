@@ -292,7 +292,12 @@ namespace LarmorPhysx
 			{
 				//No such file or directory
 				std::cout << "Create Dir: " << dirname << std::endl;
-				if (mkdir(dirname, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH ) == -1)
+
+				#if defined(WIN32) || defined(WIN64)
+					if (mkdir(dirname) == -1)
+				#elif defined(__APPLE__) || defined(LINUX) || defined(linux)
+					if (mkdir(dirname, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH ) == -1)
+				#endif
 				{
 					std::cout << "Fatal Error creating the dir: " << dirname << std::endl;
 					exit(-1);
