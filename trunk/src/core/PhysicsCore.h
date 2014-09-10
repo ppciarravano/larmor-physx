@@ -41,6 +41,7 @@
 #include <limits>
 #include <math.h>
 
+#define BT_USE_DOUBLE_PRECISION 1
 /*
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
