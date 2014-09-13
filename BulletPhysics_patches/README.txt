@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Larmor-Physx Version 1.0 2013
+ * Larmor-Physx Version 1.0 2014
  * Copyright (c) 2013 Pier Paolo Ciarravano - http://www.larmor.com
  * All rights reserved.
  *
@@ -27,7 +27,18 @@
  *
  ****************************************************************************/
  
-Bullet Physics files patches for GImpactCollision
-To apply to Bullet Physics Vers.2.81-rev2613
+Bullet Physics files patches for GImpactCollision to apply to Bullet Physics Vers.2.81-rev2613 (LarmorPhysx RevanoVX Revision: r30 13 Sept. 2014)
 
- 
+If you will apply this patches then you can use -DBULLET_USE_CGAL_PATCH=1 in LarmorPhysx RevanoVX (configure this in CMakeLists.txt or use #define BULLET_USE_CGAL_PATCH 1)
+
+To apply the patches:
+Edit the file BulletPhysics_patches/CMakeLists.txt and update INCLUDE_DIRECTORIES and LINK_DIRECTORIES with the correct paths of your third-party libraries.
+Edit the file BulletPhysics_patches/patch_BulletCollision_CMakeLists.txt and update TARGET_LINK_LIBRARIES with your third-party library names.
+
+apply the patch files:
+patch bullet-2.81-rev2613/CMakeLists.txt < ../larmor-physx/BulletPhysics_patches/patch_CMakeLists.txt
+patch bullet-2.81-rev2613/src/BulletCollision/CMakeLists.txt < ../larmor-physx/BulletPhysics_patches/patch_BulletCollision_CMakeLists.txt
+patch bullet-2.81-rev2613/src/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.cpp < ../larmor-physx/BulletPhysics_patches/patch_btGImpactCollisionAlgorithm.cpp 
+patch bullet-2.81-rev2613/src/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h < ../larmor-physx/BulletPhysics_patches/patch_btGImpactCollisionAlgorithm.h
+
+
