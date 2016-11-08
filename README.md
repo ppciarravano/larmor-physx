@@ -1,4 +1,4 @@
-# Larmor-Physx: Voronoi, Bullet Physics integration and Maya plugin
+# Larmor-Physx: Voronoi Shatter, Bullet Physics integration and Maya plugin
 
 Documentation here: [http://www.larmor.com/LarmorVoronoiMayaPlugin/](http://www.larmor.com/LarmorVoronoiMayaPlugin/)
 
